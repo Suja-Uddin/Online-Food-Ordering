@@ -1,0 +1,5 @@
+{% block content%}
+<h1> {{full_name}} logged in</h1>
+<p> <a href='{%url 'myapp:index' %}'>here </a> to go to home page </p>
+<p> <a href='{%url 'logout' %}'>here </a> to log out </p>
+{%endblock%}

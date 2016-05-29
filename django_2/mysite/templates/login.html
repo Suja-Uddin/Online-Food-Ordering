@@ -1,0 +1,18 @@
+{%block content%}
+
+{% if form.errors %}
+  <p class="error" > Sorry, invalid username/password </p>
+  {% endif %}
+
+<form action="{%url 'auth'%}" method="post">
+	{%csrf_token%}
+	<label for="username"> User Name:</label>
+	<input type="text" name="username" value="" id="username"><br>
+	<label for="password" > PassWord: </label>
+	<input type="password" name="password" value="" id="password"> <br>
+	<input type="submit" value="login"/>
+</form>
+<br>
+Don't have an account? <a href="{% url 'register'%}">Register</a> Here <br>
+Go to <a href="/myapp">Home Page</a>
+{% endblock %}
