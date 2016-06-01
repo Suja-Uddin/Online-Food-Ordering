@@ -18,11 +18,9 @@
 		
 <div>
    {%if area_name%}
-	    
-
-		    <div class=" alert alert-info" style="text-align:center;font-size:1.5em;"> 
-		    	Restaurants in <strong> {{area_name}} </strong>
-		    </div>
+	    <div class=" alert alert-info" style="text-align:center;font-size:1.5em;"> 
+	    	Restaurants in <strong> {{area_name}} </strong>
+	    </div>
 	
    {%endif%}
 </div>
@@ -32,7 +30,7 @@
 			<div class='well'>
 			{%for jj in categories%}
 			 	<div class='well'>
-				<a href="{% url 'myapp:index' %}"> {{jj.0}}
+				<a href="{% url 'myapp:area_food_category' area_name jj.0%}"> {{jj.0}} </a>
 				</div>
 			{% endfor%}
 			</div>

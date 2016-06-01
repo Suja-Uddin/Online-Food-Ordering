@@ -8,15 +8,26 @@ urlpatterns = patterns('',
 
 	url(r'^search all foods/$',views.search_food,name='search_food'),
 
-	url(r'^search all foods/(?P<food>[\w]+)/page/(?P<pagination>[\d]+)/$',views.search_food,name='search_food_pagination'),
+		#show all foods in price range
+	url(r'^foods/price_category/$',views.price_category,name='price_category'),
+
+	url(r'^search all foods/(?P<food>[\w]+)/page/(?P<pagination>[\d]+)/$',views.search_food,
+		name='search_food_pagination'),
 
 	url(r'^restaurants/$',views.all_restaurants,name='all_restaurants'),
 
-	url(r'^restaurants/page/(?P<pagination>[\d]+)/$',views.all_restaurants,name='all_restaurants_pagination'),
+	url(r'^restaurants/page/(?P<pagination>[\d]+)/$',views.all_restaurants,
+		name='all_restaurants_pagination'),
 
 	url(r'^restaurants/(?P<branch_id>[0-9]+)/$',views.show_menu,name='menu_list'),
 
-	url(r'^restaurants/(?P<branch_id>[0-9]+)/page/(?P<pagination>[\d]+)/$',views.show_menu,name='menu_list_pagination'),
+	#search in the branch by price range
+	url(r'^restaurant/(?P<branch_id>[\d]+)/search by price/$',views.branch_price_category,name='branch_price_category'),
+	#search in the area by price.shows all  related branches 
+	url(r'^restaurant/(?P<branch_id>[\d]+)/food_category/(?P<category_name>([\w]+[ ]*[\w]*))/$',views.branch_food_category,name='branch_food_category'),
+	
+	url(r'^restaurants/(?P<branch_id>[0-9]+)/page/(?P<pagination>[\d]+)/$',views.show_menu,
+		name='menu_list_pagination'),
 
 	url(r'^restaurants/(?P<branch_id>[0-9]+)/(?P<menu_id>[0-9]+)/$',views.take_order,name='order'),
 	
@@ -28,7 +39,14 @@ urlpatterns = patterns('',
 	#show all restaurants in area
 	url(r'^restaurants/area/(?P<area>[\w]+)/$',views.show_restaurants,name='restaurant_list'),
 
-	url(r'^restaurants/area/(?P<area>[\w]+)/page/(?P<pagination>[\d]+)/$',views.show_restaurants,name='restaurant_list_pagination'),
+	url(r'^restaurants/area/(?P<area>[\w]+)/page/(?P<pagination>[\d]+)/$',views.show_restaurants,
+		name='restaurant_list_pagination'),
+
+	url(r'^restaurants/area/(?P<area>[\w]+)/search by price/$',views.area_price_category,
+		name='area_price_category'),
+	#search in the area by  food category .show all related branches 
+	url(r'^restaurants/area/(?P<area>[\w]+)/search by category/(?P<category_name>([\w]+[ ]*[\w]*))/$',
+		views.area_food_category,name='area_food_category'),
 
 	url(r'^restaurants/branches/(?P<restaurant_id>[\d]+)/$',views.show_branches,name='branches'),
 
@@ -45,4 +63,7 @@ urlpatterns = patterns('',
 	url(r'^food_category/(?P<category_name>([\w]+[ ]*[\w]*))/$',views.show_food_category,name='food_category'),
 	
 	url(r'^food_category/(?P<category_name>([\w]+[ ]*[\w]*))/page/(?P<pagination>[\d]+)/$',views.show_food_category,name='food_category_pagination'),
+
+	url(r'^ajax_url/search area/$',ajax.search_area,name='search_area_ajax'),
+	url(r'^ajax_url/search food/$',ajax.search_food,name='search_food_ajax'),
 )

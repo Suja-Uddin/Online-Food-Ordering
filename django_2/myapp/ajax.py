@@ -8,6 +8,7 @@ from django.db import connection
 from collections import namedtuple
 from django.shortcuts import render_to_response 
 from django.template import RequestContext
+import json
 
 def submit_rating(request):
 	if request.method=="POST": 
@@ -62,3 +63,23 @@ def add_to_order(request):
 	cursor.callproc("add_order",(user,menu,amount))
 	
 	return JsonResponse(data)
+
+def search_area(request):
+	area=request.POST.get('area')
+	c=connection.cursor()
+	area=area.lower()
+	print(area)
+
+	c.execute("select area_name from area where lower(area_name) like '%{0}%' ".format(area))
+	area_list=c.fetchall()
+	print("list")
+	print(area_list)
+	return HttpResponse(json.dumps(area_list), content_type="application/json")
+def search_food(request):
+	food=request.POST.get('food')
+	c=connection.cursor()
+	food=food.lower()
+	print(food)
+	c.execute("select food_name from food where lower(food_name) like '%{0}%' ".format(food))
+	food_list=c.fetchall()
+	return HttpResponse(json.dumps(food_list), content_type="application/json")

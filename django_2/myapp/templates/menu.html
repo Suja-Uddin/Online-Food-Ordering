@@ -19,6 +19,7 @@
 	font-size: 20px;
 }
 </style>
+<style type="text/css">a {text-decoration: none}</style>
 </head>
 <nav class="navbar navbar-inverse navbar-fixed-top" >
   
@@ -80,11 +81,11 @@
 
                 <!-- button -->
                 <div class="modal-footer">
-                    <button id="submit_button" class="btn btn-primary btn-block">Submit</button>
+                    <button id="login_submit_button" class="btn btn-primary btn-block">Submit</button>
                 </div>
             </div>
         </div>
-    </div>  
+  </div>  
 <div class="modal fade" id="popUpWindow2">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -97,7 +98,7 @@
                 <!-- body (form) -->
                 <div class="modal-body">
                 	   {%if food_search%}
-                      <form action="{%url 'myapp:search_food_pagination' search_name 1 %}" method="POST">
+                      <form action="/myapp/search all foods/{{search_name}}/page/1/" method="POST">
                       {%else%}
                       <form action="{%url 'myapp:menu_list' branch%}" method="POST">
                       {%endif%}
@@ -125,16 +126,27 @@
         </div>
     </div>  
  <br><br>
-
+<br>
 <div id="heading">
-	   {%if food_search%}
+	   
 	   <div class="row">
-
+      {%if food_search%}
 	    <div class=" alert alert-info" style="text-align:center;font-size:1.5em;"> 
 	    	Search Results for <strong> {{search_name}} </strong>
 	    </div>
-	</div>
-	   {%endif%}
+      {%elif have_name%}
+      <div class=" alert alert-info" style="text-align:center;font-size:1.5em;"> 
+        Foods in <strong> {{have_name}},{{have_address}} </strong>
+        {%if price1%}
+          (Price between <strong>{{price1}}</strong> and <strong>{{price2}}</strong>)
+        {%endif%}
+        {%if category_name%}
+          (Category <strong> {{category_name}} </strong>)
+        {%endif%}
+      </div>
+
+      {%endif%}
+	   </div>  
 </div>
 <div id="login_error" style="display:none;">
 
@@ -144,74 +156,111 @@
     </div>
 </div>
 <div class='container'>
-	<div class='well'>
 	<div class='row'>
-		
-{%for food in foods%}
-<div class="col-md-4" id="menu{{forloop.counter}}">
-		<div class='well'>
-			<p align='center' > <strong> {{food.0}} </strong>  </p>
-			Price:<font color="blue"> {{food.2}}</font> <br>
-			Rating:<font color="blue"> {{food.4}}</font><br>
-			Category:<font color="blue"> {{food.1}}</font><br>
+    <div class='col-md-2'>
+      <div class='well'>
+      {%for jj in categories%}
+        <div class='well'>
+        <a href="{% url 'myapp:branch_food_category' branch jj.0%}"> {{jj.0}}</a>
+        </div>
+      {% endfor%}
+      </div>
+    </div>  
+    {%if form%}
+    <div class='col-md-7'>
+    {%else%}
+    <div class='col-md-7'>
+    {%endif%}
+        <div class='well'>
+        <div class='roww'>
+        {%for food in foods%}
+          <div class="" id="menu{{forloop.counter}}">
+          		<div class='well'>
+          			<p align='center' > <strong> {{food.0}} </strong>  </p>
+          			Price:<font color="blue"> {{food.2}}</font> <br>
+          			Rating:<font color="blue"> {{food.4}}</font><br>
+          			Category:<font color="blue"> {{food.1}}</font><br>
 
-			{%if food_search%}
-			Restaurant:<font color='blue'>{{food.6}},{{food.7}}</font><br>
-			{%endif%}
+          			{%if food_search%}
+          			Restaurant:<font color='blue'>{{food.6}},{{food.7}}</font><br>
+          			{%endif%}
 
-			<meta name="menu_id{{forloop.counter}}" content="{{food.3}}" />
-			Give rating:
-			<select align='left' class="dropdown" id="dropdown{{forloop.counter}}">
-				<option value='1'>1</option>
-				<option value='2'>2</option>
-				<option value='3'>3</option>
-				<option value='4'>4</option>
-				<option value='5' selected>5</option>
-				<option value='6'>6</option>
-				<option value='7'>7</option>
-				<option value='8'>8</option>
-				<option value='9'>9</option>
-				<option value='10'>10</option>
-			</select> 
-			<button class="btn btn-success btn-xs" type="submit" id="{{forloop.counter}}">submit</button> </p>
-			<br>
-		<div class='text-center'>
-		 <button type="submit" class="btn btn-success" id="order{{forloop.counter}}" value="{{forloop.counter}}">Add to Cart</button> 
-		</div>
-		</div>
-</div>
-{%endfor%}
+          			<meta name="menu_id{{forloop.counter}}" content="{{food.3}}" />
+          			Give rating:
+          			<select align='left' class="dropdown" id="dropdown{{forloop.counter}}">
+          				<option value='1'>1</option>
+          				<option value='2'>2</option>
+          				<option value='3'>3</option>
+          				<option value='4'>4</option>
+          				<option value='5' selected>5</option>
+          				<option value='6'>6</option>
+          				<option value='7'>7</option>
+          				<option value='8'>8</option>
+          				<option value='9'>9</option>
+          				<option value='10'>10</option>
+          			</select> 
+          			<button class="btn btn-success btn-xs" type="submit" id="{{forloop.counter}}">submit</button> </p>
+          			<br>
 
-</div>
+            Enter amount(Between 1 and {{food.7}}) <br>
+            <div class='row'>
+            <div class="col-xs-4">
+            <input class='form-control' size="10" type="number" id="amount{{forloop.counter}}" >
+            </div>
+            <div class="col-xs-2">
+          		<div class='text-center'>
+          		 <button type="submit" class="btn btn-success" id="order{{forloop.counter}}" value="{{forloop.counter}}">Add to Cart</button> 
+          		</div>
+            </div>
+            </div>
+          </div>
+          </div>
+        {%endfor%}
+        </div>
+        </div>
+    </div>
+    {%if form%}
+    <div class='col-md-3'>
+        <div class='well'>
+          <form action="{% url 'myapp:branch_price_category' branch %}" method="POST">
+            {% csrf_token %}
+            {% for field in form %}
+               {% bootstrap_field field show_label=False %}
+             {% endfor %}
+
+          <button name="priceSearchButton" type="submit" class="btn btn-success">Show Food</button>
+          </form>
+        </div>
+    </div>
+    {%endif%}
+  </div>
 </div>
 <ul class="pagination">
 	{% if search_name%}
-    <li><a href="{%url 'myapp:search_food_pagination' search_name 1 %}"> << </a></li>
+    <li><a href="/myapp/search all foods/{{search_name}}/page/1"> << </a></li>
     {% for i in pagination_list%}
     {% ifequal i pagination %}
-     <li class="active"><a href="{%url 'myapp:search_food_pagination' search_name i %}">
+     <li class="active"><a href="/myapp/search all foods/{{search_name}}/page/{{i}}">
      	{{i}}</a></li>
     {% else %}
-    <li><a href="{%url 'myapp:search_food_pagination' search_name i %}">{{i}}</a></li>
+    <li><a href="/myapp/search all foods/{{search_name}}/page/{{i}}">{{i}}</a></li>
     {%endifequal%}
     {%endfor%}
-    <li><a href="{%url 'myapp:search_food_pagination' search_name pagination_num %}"> >> </a></li>
+    <li><a href="/myapp/search all foods/{{search_name}}/page/{{pagination_num}}"> >> </a></li>
     {%endif %}
 </ul>
 </div>
 <script>
 	$(document).ready(function()
 	{
-		jQuery.noConflict(); 
-        {% if registration_form.errors %}  
+		        {% if registration_form.errors %}  
         $("#popUpWindow2").modal("show");
          {%endif %}
-         
         $(document).on('click', '.alert-close', function() {
             document.getElementById("login_error").style.display='none';
            });
 
-         $("#submit_button").click(function(event){
+          $("#login_submit_button").click(function(event){
  
             $.ajax({
               type:"POST",
@@ -225,7 +274,7 @@
               success : function(json) {
                 if (json.login=='success')
                 {
-                    window.location.href = "{%url 'myapp:index' %}";
+                    window.location.href = '';
                 }
                 else{
                   document.getElementById('show_error').style.display='inline';
@@ -234,79 +283,116 @@
             });
           });
 
-		$('.button').click(function(event){
-			if (this.id[0]=='o')
-			{
-				//alert("order!");
-				var id=this.id;
-				 $.ajax({
-	            type:"GET",
-	            url:"{%url 'myapp:login_varify' %}",
 
-	            success : function(json) {
-	            	console.log(json.login);
-	            	if (json.login=='success')
-	            	{
-	            		var counter=document.getElementById(id).value
-	            		console.log(counter);
-	            		var menu_id="meta[name='menu_id"+counter+"']";
-	            		var food_id=$(menu_id).attr('content');
-	            		console.log(food_id);
-	            		window.location.href = food_id;
-	            	}
-	            	else
-	            	{
-	            		alert('Please Login First');
-	            	}
+        $('.btn-success').click(function(event){
+            if (this.id[0]=='o')
+            {
+                //alert("order!");
+                var id=this.id;
+                 $.ajax({
+                type:"GET",
+                url:"{%url 'myapp:login_varify' %}",
 
-	            },
-	        	});
-			}
-			else
-			{
-				var dropdown_id='#dropdown'+this.id;
-				var menu_id="meta[name='menu_id"+this.id+"']";
-				var e = $(dropdown_id).val();
-	            $.ajax({
-	            type:"GET",
-	            url:"{%url 'myapp:login_varify' %}",
+                success : function(json) {
+                    
+                    var counter=document.getElementById(id).value;
+                    var amount=document.getElementById("amount"+counter).value;
+                    if (json.login=='success')
+                    {
 
-	            success : function(json) {
-	            	if (json.login=='success')
-	            	{
-						//console.log(e);
-						$.ajax({
-			            type: "POST",
-			            url: "{% url 'myapp:submit_rating' %}",
-			            data: {
-			            	csrfmiddlewaretoken: '{{ csrf_token }}',
-			            	value:e,
-			            	menu_id:$(menu_id).attr('content')
-		            	},
-		            	success : function(json) {
-	            			alert("Rating Submitted Successfully!")
-	            		},
-	            		error: function(data) {
-	            			alert("Error submitting rating!")
-	            		}
-	            		});
+                        var amount1="meta[name='amount"+counter+"']";
+                        amount1=$(amount1).attr('content');
+                        console.log(amount);
+                        console.log(amount1);
+                        console.log(amount1-amount);
+                        if ( amount1-amount<0 || amount<1)
+                        {
+                            alert("Enter valid amount");
 
-					}
-	            	else 
-	            	{
-	            		alert('Please Login First');
-	            	}
-	            	console.log(json.login);
-	            	
-	            	//$("#entire_page").dialog();
-	            	//console.log("success");
-	        	},
-		  		error: function(data) {
-	                //alert("Please Login First")
-	            }
-	            });
-			}
-		});
+                        }
+                        else
+                        {
+                            //console.log(counter);
+                            var menu_id="meta[name='menu_id"+counter+"']";
+                            var food_id=$(menu_id).attr('content');
+
+                            
+                                    //console.log(e);
+                            $.ajax({
+                            type: "POST",
+                            url: "{% url 'myapp:add_order' %}",
+
+                            data: {
+                                csrfmiddlewaretoken: '{{ csrf_token }}',
+                                amount:amount,
+                                menu_id:$(menu_id).attr('content')
+                            },
+                            success : function(json) {
+                                    alert("Successfully added to your order.You can submit your order or add more foods to your order.");   
+                                
+                            },
+                            error: function(data) {
+                                alert("Error in ordering food!Please reload the page and try again")
+                            }
+                            });
+                        }
+                    }
+                    else
+                    {
+                        $('#login_error').css("display","inline");
+                    }
+
+                },
+                });
+            }
+            else
+            {
+                var id=this.id;
+                var dropdown_id='#dropdown'+this.id;
+                var menu_id="meta[name='menu_id"+this.id+"']";
+                var e = $(dropdown_id).val();
+                $.ajax({
+                type:"GET",
+                url:"{%url 'myapp:login_varify' %}",
+
+                success : function(json) {
+                    if (json.login=='success')
+                    {
+                        //console.log(e);
+                        $.ajax({
+                        type: "POST",
+                        url: "{% url 'myapp:submit_rating' %}",
+                        data: {
+                            csrfmiddlewaretoken: '{{ csrf_token }}',
+                            value:e,
+                            menu_id:$(menu_id).attr('content')
+                        },
+                        success : function(json) {
+                            alert("Rating Submitted Successfully!");
+                            var rating=json.rating;
+                            console.log(rating);
+                            var rating_div="#rating"+id;
+                            console.log(rating_div);
+                            $(rating_div).html("<strong>"+rating+"</strong>");
+
+                        },
+                        error: function(data) {
+                            alert("Error submitting rating!");
+                        }
+                        });
+
+                    }
+                    else 
+                    {
+                        document.getElementById("login_error").style.display='inline';
+                    }
+                },
+                error: function(data) {
+                    //alert("Please Login First")
+                }
+                });
+            }
+        });
 		
 	});
 </script>

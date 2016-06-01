@@ -168,20 +168,10 @@
     </div>
 
     <div class='col-sm-4'>
-
-        <form action="{% url 'myapp:index'%}" method="POST">
+ <form action="{% url 'myapp:price_category' %}" method="POST">
           {% csrf_token %}
-           
           {% for field in form %}
-
              {% bootstrap_field field show_label=False %}
-              
-                        <!--{% for error  in field.errors %}
-                        <!-- Output error text message only -->
-
-                         <!--   {{error}}
-                        {% endfor %} -->
-
         {% endfor %}
 
         <button name="priceSearchButton" type="submit" class="btn btn-success">Show Food</button>
@@ -216,18 +206,15 @@
   </div >
 
 <script>
-$(document).ready(function() {
+  $(document).ready(function() {
   jQuery.noConflict(); 
-  
-{% if registration_form.errors %}  
-$("#popUpWindow2").modal("show");
- {%endif %}
 
-var tags = [];
-{% for ii in area_list%}
-   tags.push("{{ii}}")
-{%endfor%}
-//here goes code for showing suggestion 
+  {% if registration_form.errors %}  
+  $("#popUpWindow2").modal("show");
+  {%endif %}
+
+  var tags = [];
+  //here goes code for showing suggestion 
   $( "#textfield" ).autocomplete({
           source: function( request, response ) {
                   var matcher = new RegExp( "^" + $.ui.autocomplete.escapeRegex( request.term ), "i" );
@@ -236,9 +223,35 @@ var tags = [];
                   }) );
               }
         });
+  $("#textfield").keyup(function(){
+      //console.log(e);
+      var e=this.value;
+      if (e.length==0) tags=[];
+      if (e.length>=3)
+      {
+        $.ajax({
+          type:"POST",
+          url:"{%url 'myapp:search_area_ajax' %}",
 
+          data: {
+            csrfmiddlewaretoken: '{{ csrf_token }}',
+            area:this.value,
+          },
+          success : function(json) {
+            console.log(json[0]);
+            console.log(json.length);
+            var i;
+            tags=[]
+            for(i=0;i<json.length;i++)
+              tags.push(json[i][0]);
+          },
+        });
+      }
+      
+
+  });
   $("#submit_button").click(function(event){
- 
+
     $.ajax({
       type:"POST",
       url:"{%url 'auth' %}",
@@ -299,10 +312,32 @@ var tags = [];
 
 
       var tags1 = [];
-      {% for ii in food_list%}
-         tags1.push("{{ii}}")
-      {%endfor%}
+      $("#search_food").keyup(function(){
+        var e=this.value;
+        console.log(e);
+        if (e.length==0) tags1=[];
+        if (e.length>=3)
+        {
+          $.ajax({
+            type:"POST",
+            url:"{%url 'myapp:search_food_ajax' %}",
 
+            data: {
+              csrfmiddlewaretoken: '{{ csrf_token }}',
+              food:e,
+            },
+            success : function(json) {
+              var i;
+              console.log(json);
+              console.log(json[0]);
+              tags1=[]
+              for(i=0;i<json.length;i++)
+
+                tags1.push(json[i][0]);
+            },
+          });
+        }
+      });
       $( "#search_food" ).autocomplete({
         source: function( request, response ) {
                 var matcher = new RegExp( "^" + $.ui.autocomplete.escapeRegex( request.term ), "i" );
@@ -311,7 +346,7 @@ var tags = [];
                 }) );
             }
       });
-});
+  });
 </script>
  
 </body>

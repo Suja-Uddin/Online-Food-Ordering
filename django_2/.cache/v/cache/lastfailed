@@ -1,0 +1,5 @@
+{
+  "test_project.py::TestProject::()::test_index_view": true,
+  "test_status_code.py::TestProject::()::test_food_category_view": true,
+  "test_status_code.py::TestProject::()::test_index_view": true
+}

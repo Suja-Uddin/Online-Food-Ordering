@@ -46,7 +46,6 @@
     </div>
     </div>
 </nav>
-
 <div class="modal fade" id="popUpWindow1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -90,8 +89,11 @@
                 </div>
                 <!-- body (form) -->
                 <div class="modal-body">
-                      <forM action="{%url 'myapp:food_category' category_name%}" method="POST">
-
+                    {%if category_name%}
+                    <form action="{%url 'myapp:food_category' category_name%}" method="POST">
+                    {%else%}
+                    <form action="{%url 'myapp:index'%}" method="POST">
+                    {%endif%}
                          {% csrf_token %}
                            
                           {% for field in registration_form %}

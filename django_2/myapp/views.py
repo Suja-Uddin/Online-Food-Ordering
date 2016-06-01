@@ -14,7 +14,6 @@ from django.http import Http404
 from django.core.context_processors import csrf
 from math import *
 def index(request,form_error=0):
-
 	tmpl=loader.get_template("index.html")
 	registration_form=MyRegistrationForm()
 	if form_error==0:
@@ -22,22 +21,13 @@ def index(request,form_error=0):
 	else:
 		form=priceForm(request.POST)
 	if form_error==0 and request.method=='POST':
-		if 'priceSearchButton' in request.POST:
-			return price_category(request)
 		if "registerButton" in request.POST:
 			registration_form=MyRegistrationForm(request.POST)
 			if registration_form.is_valid():
 				registration_form.save()
 				registration_form=MyRegistrationForm()
 	c=connection.cursor()
-	qq="select AREA_NAME from AREA"
-	c.execute(qq)
-
-	area_list=[]
-	for ii in c.fetchall():
-		#print(ii[0])
-		area_list.append(ii[0])
-
+	
 	qq="select DISTINCT f.food_name from food f , menu m where f.food_id=m.food_id ORDER BY F.food_name";
 	c.execute(qq)
 	food_list=[]
@@ -48,8 +38,8 @@ def index(request,form_error=0):
 	c.execute(qq)
 	categories=c.fetchall()
 
-	cont=RequestContext(request, {'registration_form':registration_form,'food_list':food_list,'form':form,
-		'area_list':area_list,'categories':categories})
+	cont=RequestContext(request, {'registration_form':registration_form,
+		'form':form,'categories':categories})
 	
 	return HttpResponse(tmpl.render(cont))
 def show_food_category(request,category_name,pagination=1):
@@ -196,6 +186,71 @@ def show_restaurants(request,area,form_error=0,pagination=1):
 	return render_to_response("restaurants.html",RequestContext(request,{'area_name':area,
 		'food_list':food_list,'form':form,'restaurants':restaurant_list,'area':area,
 		'user':request.user,'categories':categories}))
+def area_price_category(request,area):
+	if request.method=='POST':
+		form=priceForm(request.POST)
+		if form.is_valid():
+			price1=form.cleaned_data['price1']
+			price2=form.cleaned_data['price2']
+			c=connection.cursor()
+			c.execute("select b.branch_id,(select restaurant_name from restaurant where restaurant_id=b.restaurant_id),\
+			b.address from Area a, Branch b where a.AREA_ID=b.AREA_ID and lower(a.AREA_NAME)=%s",(area.lower(),))
+		
+			branches=c.fetchall()
+
+			foods=[]
+			for branch in branches:
+				for i in range (1,50):
+					foods.append([])
+			
+			i=0
+			for branch in branches:
+				c.execute("select F.food_name,F.category,M.price,find_rating(m.menu_id),M.menu_id from Menu M, Food F\
+				 where M.food_id=F.food_id and M.branch_id=%s and M.price>=%s and M.price<=%s \
+				 order by m.price",(branch[0],price1,price2,))
+			
+				temp=c.fetchall()
+				for ii in temp:
+					foods[i].append(branch[0])
+					foods[i].append(ii[0])
+					foods[i].append(ii[2])
+					foods[i].append(ii[3])
+					foods[i].append(branch[1])
+					foods[i].append(branch[2])
+					foods[i].append(ii[4])
+				i+=1
+			return render(request,"food_category.html",{'foods':foods,'price1':price1,'price2':price2})
+		else :
+			return show_restaurants(request,area,1)
+	return show_restaurants(request,area,1)
+def area_food_category(request,area,category_name):
+	c=connection.cursor()
+	c.execute("select b.branch_id,(select restaurant_name from restaurant where restaurant_id=b.restaurant_id),\
+	b.address from Area a, Branch b where a.AREA_ID=b.AREA_ID and lower(a.AREA_NAME)=lower(%s)",(area,))
+	branches=c.fetchall()
+	foods=[]
+	for branch in branches:
+		for i in range (1,50):
+			foods.append([])
+	
+	i=0
+
+	for branch in branches:
+		c.execute("select F.food_name,F.category,M.price,find_rating(m.menu_id),M.menu_id from Menu M, Food F\
+		 where M.food_id=F.food_id and M.branch_id=%s and lower(F.category)=lower(%s) \
+		 order by m.price",(branch[0],category_name,))
+	
+		temp=c.fetchall()
+		for ii in temp:
+			foods[i].append(branch[0])
+			foods[i].append(ii[0])
+			foods[i].append(ii[2])
+			foods[i].append(ii[3])
+			foods[i].append(branch[1])
+			foods[i].append(branch[2])
+			foods[i].append(ii[4])
+		i+=1
+	return render(request,"food_category.html",{'foods':foods,'category_name':category_name})
 def take_order(request):
 	c=connection.cursor()
 	temp=[]
@@ -267,8 +322,12 @@ def take_order(request):
 
 	form=orderForm();
 	return render(request,"order.html",RequestContext(request,{'orderid':orderid,'form':form,'order_list':order_list}))
-def show_menu(request,branch_id,pagination=1):
+def show_menu(request,branch_id,sort_rating=0,pagination=1,form_error=0):
 	registration_form=MyRegistrationForm()
+	form=priceForm()
+	if form_error!=0:
+		form=priceForm(request.POST)
+
 	if request.method=='POST':
 		if "registerButton" in request.POST:
 			registration_form=MyRegistrationForm(request.POST)
@@ -276,14 +335,78 @@ def show_menu(request,branch_id,pagination=1):
 			if registration_form.is_valid():
 				registration_form.save()
 				registration_form=MyRegistrationForm()
-
 	c=connection.cursor()
-	qq="select F.food_name,F.category,M.price,M.menu_id,(select avg(rating_value) from RATING where MENU_ID=M.MENU_ID) from FOOD F, MENU M where F.food_id=M.food_id and M.branch_id={0} order by M.price".format(branch_id)
+	if sort_rating==1:
+		c.execute("select F.food_name,F.category,M.price,M.menu_id,find_rating(m.menu_id),M.amount from FOOD F,\
+		 MENU M where F.food_id=M.food_id and M.branch_id=%s order by find_rating(m.menu_id)",(branch_id,))
+	else:
+		c.execute("select F.food_name,F.category,M.price,M.menu_id,find_rating(m.menu_id),M.amount from FOOD F,\
+		 MENU M where F.food_id=M.food_id and M.branch_id=%s order by M.price",(branch_id,))
+	#c.execute(qq)
+	foods=c.fetchall() 
+	c.execute("select r.restaurant_name,b.address from branch b,restaurant r where b.branch_id=%s and \
+		b.restaurant_id=r.restaurant_id",(branch_id,))
+	temp=c.fetchone()
+	restaurant_name=temp[0]
+	res_address=temp[1]
+	c.execute("SELECT DISTINCT CATEGORY FROM FOOD F, Menu M where F.food_id=M.food_id and M.branch_id=%s\
+	 order by CATEGORY",(branch_id,))
+	categories=c.fetchall()
+
+	qq="select DISTINCT f.food_name from food f , menu m where f.food_id=m.food_id ORDER BY F.food_name";
 	c.execute(qq)
-	return render(request,"menu.html",RequestContext(request,{'registration_form':registration_form,
-		'foods':c.fetchall(),'user':request.user,'branch':branch_id}))
+	food_list=[]
+	for ii in c.fetchall():
+		food_list.append(ii[0])
+	return render(request,"menu.html",RequestContext(request,{'form':form,'food_list':food_list,
+		'foods':foods,'have_name':restaurant_name,'have_address':res_address,'user':request.user,
+		'branch':branch_id,'categories':categories}))
+def branch_price_category(request,branch_id):
+	if request.method=='POST':
+		form=priceForm(request.POST)
+		if form.is_valid():
+			c=connection.cursor()
+			price1=form.cleaned_data['price1']
+			price2=form.cleaned_data['price2']
+			c.execute("SELECT F.food_name,M.PRICE,F.category,M.menu_id,find_rating(m.menu_id),M.amount \
+			FROM FOOD F, MENU M WHERE F.FOOD_ID=M.FOOD_ID AND M.price>=%s and M.price<=%s \
+			AND M.BRANCH_ID=%s order by m.price",(price1,price2,branch_id,))
+			
+			#c.execute(qq)
+			foods=c.fetchall()
+			c.execute("select r.restaurant_name,b.address from branch b,restaurant r where b.branch_id=%s \
+				and b.restaurant_id=r.restaurant_id",(branch_id,))
+			temp=c.fetchone()
+			restaurant_name=temp[0]
+			res_address=temp[1]
+			form=priceForm()
+			return render(request,"menu.html",{'form':form,'foods':foods,'user':request.user,
+				'branch':branch_id,'have_name':restaurant_name,'have_address':res_address,
+				'price1':price1,'price2':price2})
+		
+		return show_menu(request,branch_id,1,1,1)
+	return show_menu(request,branch_id,1)
+def branch_food_category(request,branch_id,category_name):
+	c=connection.cursor()
+	c.execute("select f.food_name,f.category,m.price,m.menu_id,find_rating(m.menu_id),m.amount from Food f,Menu m\
+	 where f.food_id=m.food_id and m.branch_id=%s and f.category=%s order by m.price",(branch_id,category_name,))
+	
+	foods=c.fetchall()
+	c.execute("select r.restaurant_name,b.address from branch b, restaurant r where b.restaurant_id=r.restaurant_id \
+		and b.branch_id=%s",(branch_id,))
+	temp=c.fetchone()
+	restaurant_name=temp[0]
+	res_address=temp[1]
+	c.execute("SELECT DISTINCT CATEGORY FROM FOOD F, Menu M where F.food_id=M.food_id and M.branch_id=%s\
+	 order by CATEGORY",(branch_id,))
+	categories=c.fetchall()
+
+	return render(request,"menu.html",{'categories':categories,'foods':foods,'user':request.user,'branch':branch_id,
+		'have_name':restaurant_name,'have_address':res_address,'category_name':category_name})
+
 def search_food(request,food="",pagination=1):
 	registration_form=MyRegistrationForm()
+	food_name=""
 	if request.method=='POST':
 		if "registerButton" in request.POST:
 			registration_form=MyRegistrationForm(request.POST)
@@ -293,7 +416,9 @@ def search_food(request,food="",pagination=1):
 			food_name=food
 		else:
 			food_name=request.POST['search_food']
-	print(food_name)
+	
+	else:
+		food_name=food
 	c=connection.cursor()
 	temp="%"+food_name.lower()+"%"
 	c.execute("select F.food_name,F.category,M.price,M.menu_id,find_rating(m.menu_id),\
@@ -337,8 +462,7 @@ def search_food(request,food="",pagination=1):
 
 	
 	pagination_num=int(ceil(pagination_num))
-	print(len(foods))
-	print(pagination_num)
+	
 	pagination_list=[]
 	if pagination>2:
 		pagination_list.append(pagination-2)
@@ -349,7 +473,7 @@ def search_food(request,food="",pagination=1):
 		pagination_list.append(pagination+1)
 	if pagination+2<=pagination_num:
 		pagination_list.append(pagination+2)
-	print(pagination_list)
+	print(food_name)
 	return render(request,"menu.html",RequestContext(request,{'registration_form':registration_form,
 		'pagination_num':pagination_num,'pagination':pagination,'pagination_list':pagination_list,
 		'search_name':food_name,'food_list':food_list,'foods':foodlist,'user':request.user,
@@ -403,40 +527,47 @@ def show_branches(request,restaurant_id,pagination=1):
 		food_list.append(ii[0])
 	return render_to_response("branch.html",RequestContext(request,{'food_list':food_list,'user':request.user,
 		'restaurant_list':restaurant_list,'restaurant_name':restaurant_name[0],'categories':categories}))
-def price_category(request,pagination=1):
-	form=priceForm(request.POST)
-	if form.is_valid():
-		print("valid")
-		price1=form.cleaned_data['price1']
-		price2=form.cleaned_data['price2']
-		c=connection.cursor()
-		c.execute("SELECT M.BRANCH_ID,F.food_name,M.PRICE,find_rating(m.menu_id),M.menu_id, M.amount\
-		FROM FOOD F, MENU M WHERE F.FOOD_ID=M.FOOD_ID AND M.price>=%s and M.price<=%s\
-		 order by m.price",(price1,price2,))
-		info=c.fetchall()
-		foods=[]
-		for ii in info:
-			foods.append([])
-			
+def price_category(request):
+	registration_form=MyRegistrationForm()
+	if request.method=='POST':
+		if "registerButton" in request.POST:
+			registration_form=MyRegistrationForm(request.POST)
+			if registration_form.is_valid():
+				registration_form.save()
+				registration_form=MyRegistrationForm()
+		else:
+			form=priceForm(request.POST)
+			if form.is_valid():
+				price1=form.cleaned_data['price1']
+				price2=form.cleaned_data['price2']
+				c=connection.cursor()
+				c.execute("SELECT M.BRANCH_ID,F.food_name,M.PRICE,find_rating(m.menu_id),M.menu_id \
+				FROM FOOD F, MENU M WHERE F.FOOD_ID=M.FOOD_ID AND M.price>=%s and M.price<=%s\
+				 order by m.price",(price1,price2,))
+				info=c.fetchall()
+				foods=[]
+				for ii in info:
+					foods.append([])
 
-		i=0
-		for ii in info:
-			c.execute("select r.restaurant_name,b.ADDRESS from restaurant r , branch b\
-			 where r.restaurant_id=b.restaurant_id and b.branch_id=%s",(ii[0],))
-			temp=c.fetchone()
+				i=0
+				for ii in info:
+					c.execute("select r.restaurant_name,b.ADDRESS from restaurant r , branch b\
+					 where r.restaurant_id=b.restaurant_id and b.branch_id=%s",(ii[0],))
+					temp=c.fetchone()
 
-			foods[i].append(ii[0])
-			foods[i].append(ii[1])
-			foods[i].append(ii[2])
-			foods[i].append(ii[3])
-			foods[i].append(temp[0])
-			foods[i].append(temp[1])
-			foods[i].append(ii[4])
-			foods[i].append(ii[5])
-			i+=1
-		category_name=''	
-		return render(request,"food_category.html",{'foods':foods,'category_name':category_name,'price1':price1,'price2':price2})
-	args={}
-	args.update(csrf(request))
-	args['form']=form
+					foods[i].append(ii[0])
+					foods[i].append(ii[1])
+					foods[i].append(ii[2])
+					foods[i].append(ii[3])
+					foods[i].append(temp[0])
+					foods[i].append(temp[1])
+					foods[i].append(ii[4])
+					i+=1
+				category_name=''	
+				return render(request,"food_category.html",{'registration_form':registration_form,
+					'foods':foods,'price1':price1,'price2':price2})
+			args={}
+			args.update(csrf(request))
+			args['form']=form
+			return index(request,1)
 	return index(request,1)
