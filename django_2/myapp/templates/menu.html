@@ -185,14 +185,15 @@
           		<div class='well'>
           			<p align='center' > <strong> {{food.0}} </strong>  </p>
           			Price:<font color="blue"> {{food.2}}</font> <br>
-          			Rating:<font color="blue"> {{food.4}}</font><br>
+          			Rating:<div id="rating{{forloop.counter}}"> <strong> {{food.4}}</strong></div> <br>
           			Category:<font color="blue"> {{food.1}}</font><br>
 
           			{%if food_search%}
           			Restaurant:<font color='blue'>{{food.6}},{{food.7}}</font><br>
           			{%endif%}
-
+                {{food.3}}
           			<meta name="menu_id{{forloop.counter}}" content="{{food.3}}" />
+                <meta name="amount{{forloop.counter}}" content="{{food.5}}" />
           			Give rating:
           			<select align='left' class="dropdown" id="dropdown{{forloop.counter}}">
           				<option value='1'>1</option>
@@ -209,7 +210,10 @@
           			<button class="btn btn-success btn-xs" type="submit" id="{{forloop.counter}}">submit</button> </p>
           			<br>
 
-            Enter amount(Between 1 and {{food.7}}) <br>
+            <div id="show_amount{{forloop.counter}}"> 
+              <strong> Enter amount(Between 1 and {{food.5}}</strong>
+            </div><br>
+
             <div class='row'>
             <div class="col-xs-4">
             <input class='form-control' size="10" type="number" id="amount{{forloop.counter}}" >
@@ -315,7 +319,6 @@
                         amount1=$(amount1).attr('content');
                         console.log(amount);
                         console.log(amount1);
-                        console.log(amount1-amount);
                         if ( amount1-amount<0 || amount<1)
                         {
                             alert("Enter valid amount");
@@ -324,11 +327,11 @@
                         else
                         {
                             //console.log(counter);
-                            var menu_id="meta[name='menu_id"+counter+"']";
+                            var menu="meta[name='menu_id"+counter+"']";
                             var food_id=$(menu_id).attr('content');
 
                             
-                                    //console.log(e);
+                                    console.log($(menu).attr('content'));
                             $.ajax({
                             type: "POST",
                             url: "{% url 'myapp:add_order' %}",
@@ -336,10 +339,23 @@
                             data: {
                                 csrfmiddlewaretoken: '{{ csrf_token }}',
                                 amount:amount,
-                                menu_id:$(menu_id).attr('content')
+                                menu_id:$(menu).attr('content'),
                             },
                             success : function(json) {
                                     alert("Successfully added to your order.You can submit your order or add more foods to your order.");   
+                                    var amount=json.amount;
+                                    console.log(amount)
+                                    var order_div="#show_amount"+id[5];
+                                    if (amount>0)
+                                    {
+                                        $(order_div).html("<strong> Enter amount(Between 1 and "+amount+"</strong>"); 
+                                    }
+                                    else 
+                                    {
+                                        $(order_div).html("<strong>Not available!</strong>"); 
+                                        var _div="#show_amount"+id[5];
+                                    }
+                                    
                                 
                             },
                             error: function(data) {

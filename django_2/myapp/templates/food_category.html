@@ -177,7 +177,9 @@
                     <option value='10'>10</option>
                 </select> 
                 <button class="btn btn-success btn-xs" type="submit" id="{{forloop.counter}}">submit</button> </p>
-            Enter amount(Between 1 and {{food.7}}) <br>
+            <div id="show_amount{{forloop.counter}}"> 
+              <strong> Enter amount(Between 1 and {{food.7}}</strong>
+            </div><br>
             <input class='form-control' size="10" type="number" id="amount{{forloop.counter}}" >
             <p align='center'> <button type="submit" class="btn btn-success" id="order{{forloop.counter}}" value="{{forloop.counter}}">Add to Cart</button> </p>
 
@@ -213,10 +215,10 @@
         {%endifequal%}
         {%endfor%}
        {%if food_name%}
-        <li><a href="/myapp/search all foods/{{food_name}}/food_category/{{category_name}}/page/{{pagination_num}}"> << 
+        <li><a href="/myapp/search all foods/{{food_name}}/food_category/{{category_name}}/page/{{pagination_num}}"> >> 
         </a></li>
         {%else%}
-        <li><a href="/myapp/food_category/{{category_name}}/page/{{pagination_num}}"> << </a></li>
+        <li><a href="/myapp/food_category/{{category_name}}/page/{{pagination_num}}"> >> </a></li>
         {%endif%}
     </ul>
 </div>
@@ -300,7 +302,18 @@
                                 menu_id:$(menu_id).attr('content')
                             },
                             success : function(json) {
-                                    alert("Successfully added to your order.You can submit your order or add more foods to your order.");   
+                                    alert("Successfully added to your order.You can submit your order or add more foods to your order.");  
+                                    var amount=json.amount;
+                                    console.log(amount)
+                                    var order_div="#show_amount"+id[5];
+                                    if (amount>0)
+                                    {
+                                        $(order_div).html("<strong> Enter amount(Between 1 and "+amount+"</strong>"); 
+                                    }
+                                    else 
+                                    {
+                                        $(order_div).html("<strong>Not available!</strong>"); 
+                                    }
                                 
                             },
                             error: function(data) {
@@ -346,9 +359,7 @@
                         success : function(json) {
                             alert("Rating Submitted Successfully!");
                             var rating=json.rating;
-                            console.log(rating);
                             var rating_div="#rating"+id;
-                            console.log(rating_div);
                             $(rating_div).html("<strong>"+rating+"</strong>");
 
                         },

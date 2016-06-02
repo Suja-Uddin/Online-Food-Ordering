@@ -18,9 +18,8 @@ urlpatterns = patterns('',
 
 	url(r'^restaurants/page/(?P<pagination>[\d]+)/$',views.all_restaurants,
 		name='all_restaurants_pagination'),
-
+	
 	url(r'^restaurants/(?P<branch_id>[0-9]+)/$',views.show_menu,name='menu_list'),
-
 	#search in the branch by price range
 	url(r'^restaurant/(?P<branch_id>[\d]+)/search by price/$',views.branch_price_category,name='branch_price_category'),
 	#search in the area by price.shows all  related branches 

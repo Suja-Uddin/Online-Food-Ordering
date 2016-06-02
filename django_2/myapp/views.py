@@ -345,13 +345,33 @@ def show_menu(request,branch_id,sort_rating=0,pagination=1,form_error=0):
 				registration_form=MyRegistrationForm()
 	c=connection.cursor()
 	if sort_rating==1:
-		c.execute("select F.food_name,F.category,M.price,M.menu_id,find_rating(m.menu_id),M.amount from FOOD F,\
-		 MENU M where F.food_id=M.food_id and M.branch_id=%s order by find_rating(m.menu_id)",(branch_id,))
+		c.execute("SELECT F.category,F.food_name,M.PRICE,find_rating(m.menu_id),M.menu_id,M.amount FROM FOOD F, MENU M \
+		WHERE F.FOOD_ID=M.FOOD_ID AND M.branch_id=%s  order by find_rating(m.menu_id)",(branch_id,))
 	else:
-		c.execute("select F.food_name,F.category,M.price,M.menu_id,find_rating(m.menu_id),M.amount from FOOD F,\
-		 MENU M where F.food_id=M.food_id and M.branch_id=%s order by M.price",(branch_id,))
-	#c.execute(qq)
-	foods=c.fetchall() 
+		c.execute("SELECT F.category,F.food_name,M.PRICE,find_rating(m.menu_id),M.menu_id,M.amount FROM FOOD F, MENU M \
+		WHERE F.FOOD_ID=M.FOOD_ID AND M.branch_id=%s order by m.price",(branch_id,))
+	#
+	
+	info=c.fetchall()
+	foods=[]
+	for ii in info:
+		foods.append([])
+	i=0
+	for ii in info:
+		c.execute("select r.restaurant_name,b.ADDRESS from restaurant r , branch b \
+			where r.restaurant_id=b.restaurant_id and b.branch_id=%s",(branch_id,))
+		temp=c.fetchone()
+
+		foods[i].append(ii[1]) #food name
+		foods[i].append(ii[0]) #category
+		foods[i].append(ii[2]) #price
+		foods[i].append(ii[4]) #menu id
+		foods[i].append(ii[3]) #rating
+		foods[i].append(ii[5]) #amount
+		foods[i].append(temp[0]) #res name
+		foods[i].append(temp[1]) #res addres
+		i+=1
+	
 	c.execute("select r.restaurant_name,b.address from branch b,restaurant r where b.branch_id=%s and \
 		b.restaurant_id=r.restaurant_id",(branch_id,))
 	temp=c.fetchone()
@@ -360,13 +380,7 @@ def show_menu(request,branch_id,sort_rating=0,pagination=1,form_error=0):
 	c.execute("SELECT DISTINCT CATEGORY FROM FOOD F, Menu M where F.food_id=M.food_id and M.branch_id=%s\
 	 order by CATEGORY",(branch_id,))
 	categories=c.fetchall()
-
-	qq="select DISTINCT f.food_name from food f , menu m where f.food_id=m.food_id ORDER BY F.food_name";
-	c.execute(qq)
-	food_list=[]
-	for ii in c.fetchall():
-		food_list.append(ii[0])
-	return render(request,"menu.html",RequestContext(request,{'form':form,'food_list':food_list,
+	return render(request,"menu.html",RequestContext(request,{'form':form,
 		'foods':foods,'have_name':restaurant_name,'have_address':res_address,'user':request.user,
 		'branch':branch_id,'categories':categories}))
 def branch_price_category(request,branch_id):

@@ -61,7 +61,10 @@ def add_to_order(request):
 	data={}
 	
 	cursor.callproc("add_order",(user,menu,amount))
-	
+	cursor.execute("select m.amount from food f,menu m where f.food_id=m.food_id and m.menu_id=%s",(menu,))
+	temp=cursor.fetchone()
+	print(temp[0])
+	data['amount']=temp[0]
 	return JsonResponse(data)
 
 def search_area(request):
