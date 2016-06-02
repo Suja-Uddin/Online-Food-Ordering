@@ -42,6 +42,7 @@ def index(request,form_error=0):
 		'form':form,'categories':categories})
 	
 	return HttpResponse(tmpl.render(cont))
+
 def show_food_category(request,category_name,pagination=1):
 	registration_form=MyRegistrationForm()
 	if request.method=='POST':
@@ -130,6 +131,13 @@ def all_restaurants(request,pagination=1):
 	return render_to_response('all_restaurants.html',RequestContext(request,{'food_list':food_list,
 		'categories':categories,'restaurants':restaurant_list,'area_list':area_list,'form':form}))
 def show_restaurants(request,area,form_error=0,pagination=1): 
+	registration_form=MyRegistrationForm()
+	if request.method=='POST':
+		if "registerButton" in request.POST:
+			registration_form=MyRegistrationForm(request.POST)
+			if registration_form.is_valid():
+				registration_form.save()
+				registration_form=MyRegistrationForm()
 	area=area.lower()
 	c=connection.cursor()
 	c.execute("SELECT B.branch_id,B.restaurant_id FROM AREA A,BRANCH B \
@@ -183,8 +191,8 @@ def show_restaurants(request,area,form_error=0,pagination=1):
 	food_list=[]
 	for ii in c.fetchall():
 		food_list.append(ii[0])
-	return render_to_response("restaurants.html",RequestContext(request,{'area_name':area,
-		'food_list':food_list,'form':form,'restaurants':restaurant_list,'area':area,
+	return render_to_response("restaurants.html",RequestContext(request,{'registration_form':registration_form,
+		'area_name':area,'food_list':food_list,'form':form,'restaurants':restaurant_list,'area':area,
 		'user':request.user,'categories':categories}))
 def area_price_category(request,area):
 	if request.method=='POST':
@@ -404,6 +412,70 @@ def branch_food_category(request,branch_id,category_name):
 	return render(request,"menu.html",{'categories':categories,'foods':foods,'user':request.user,'branch':branch_id,
 		'have_name':restaurant_name,'have_address':res_address,'category_name':category_name})
 
+def show_food_category_with_name(request,food_name,category_name,pagination=1):
+	registration_form=MyRegistrationForm()
+	if request.method=='POST':
+		if "registerButton" in request.POST:
+			registration_form=MyRegistrationForm(request.POST)
+			print('here')
+			if registration_form.is_valid():
+				registration_form.save()
+				registration_form=MyRegistrationForm()
+
+	c=connection.cursor()
+	#print(category_name)
+	temp="%"+food_name.lower()+"%"
+	c.execute("SELECT M.BRANCH_ID,F.food_name,M.PRICE,find_rating(m.menu_id),M.menu_id,M.amount FROM FOOD F, MENU M \
+	WHERE F.FOOD_ID=M.FOOD_ID AND F.CATEGORY=%s and lower(f.food_name) like %s order by m.price",(category_name,temp,))
+	
+	info=c.fetchall()
+	foods=[]
+	for ii in info:
+		foods.append([])
+
+	i=0
+	cnt=0
+	pagination=int (pagination)
+	pagination_num=len(info)/9
+	start=9*(pagination-1)
+	end=start+9
+	info=info[start:end]
+	for ii in info:
+		c.execute("select r.restaurant_name,b.ADDRESS from restaurant r , branch b \
+			where r.restaurant_id=b.restaurant_id and b.branch_id=%s",(ii[0],))
+		temp=c.fetchone()
+
+		foods[i].append(ii[0])
+		foods[i].append(ii[1])
+		foods[i].append(ii[2])
+		foods[i].append(ii[3])
+		foods[i].append(temp[0])
+		foods[i].append(temp[1])
+		foods[i].append(ii[4])
+		foods[i].append(ii[5])
+		i+=1
+	
+	qq="select DISTINCT f.food_name from food f , menu m where f.food_id=m.food_id ORDER BY F.food_name";
+	c.execute(qq)
+	food_list=[]
+	for ii in c.fetchall():
+		food_list.append(ii[0])
+
+	
+	pagination_num=int(ceil(pagination_num))
+	pagination_list=[]
+	if pagination>2:
+		pagination_list.append(pagination-2)
+	if pagination>1:
+		pagination_list.append(pagination-1)
+	pagination_list.append(pagination)
+	if pagination+1<=pagination_num:
+		pagination_list.append(pagination+1)
+	if pagination+2<=pagination_num:
+		pagination_list.append(pagination+2)
+	return render(request,"food_category.html",{'registration_form':registration_form,'pagination_num':pagination_num,'pagination':pagination,
+		'pagination_list':pagination_list,'food_list':food_list,'foods':foods,
+		'category_name':category_name,'food_name':food_name})
 def search_food(request,food="",pagination=1):
 	registration_form=MyRegistrationForm()
 	food_name=""
@@ -459,8 +531,11 @@ def search_food(request,food="",pagination=1):
 	food_list=[]
 	for ii in c.fetchall():
 		food_list.append(ii[0])
-
-	
+	temp="%"+food_name.lower()+"%"
+	c.execute("SELECT DISTINCT CATEGORY FROM FOOD F, Menu M where F.food_id=M.food_id and lower(F.food_name) like %s\
+	 order by CATEGORY",(temp,))
+	categories=c.fetchall()
+	print(categories)
 	pagination_num=int(ceil(pagination_num))
 	
 	pagination_list=[]
@@ -473,11 +548,10 @@ def search_food(request,food="",pagination=1):
 		pagination_list.append(pagination+1)
 	if pagination+2<=pagination_num:
 		pagination_list.append(pagination+2)
-	print(food_name)
 	return render(request,"menu.html",RequestContext(request,{'registration_form':registration_form,
 		'pagination_num':pagination_num,'pagination':pagination,'pagination_list':pagination_list,
 		'search_name':food_name,'food_list':food_list,'foods':foodlist,'user':request.user,
-		'food_search':foodsearch}))
+		'food_search':foodsearch,'categories':categories}))
 def show_branches(request,restaurant_id,pagination=1):
 	#qq="SELECT DISTINCT CATEGORY FROM FOOD"
 	c=connection.cursor()

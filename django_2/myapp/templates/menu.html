@@ -157,19 +157,26 @@
 </div>
 <div class='container'>
 	<div class='row'>
+    {%if categories%}
+
     <div class='col-md-2'>
       <div class='well'>
       {%for jj in categories%}
         <div class='well'>
+        {% if branch %}
         <a href="{% url 'myapp:branch_food_category' branch jj.0%}"> {{jj.0}}</a>
+        {%else%}
+        <a href="{% url 'myapp:food_category_with_name' search_name jj.0%}"> {{jj.0}}</a>
+        {%endif%}
         </div>
       {% endfor%}
       </div>
     </div>  
-    {%if form%}
+    {%endif%}
+    {%if categories%}
     <div class='col-md-7'>
     {%else%}
-    <div class='col-md-7'>
+    <div class='col-md-9'>
     {%endif%}
         <div class='well'>
         <div class='roww'>
@@ -285,7 +292,11 @@
 
 
         $('.btn-success').click(function(event){
-            if (this.id[0]=='o')
+            if (this.name=='priceSearchButton')
+            {
+
+            }
+            else if (this.id[0]=='o')
             {
                 //alert("order!");
                 var id=this.id;

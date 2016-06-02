@@ -70,7 +70,7 @@ def search_area(request):
 	area=area.lower()
 	print(area)
 
-	c.execute("select area_name from area where lower(area_name) like '%{0}%' ".format(area))
+	c.execute("select area_name from area where lower(area_name) like '{0}%' ".format(area))
 	area_list=c.fetchall()
 	print("list")
 	print(area_list)
@@ -80,6 +80,6 @@ def search_food(request):
 	c=connection.cursor()
 	food=food.lower()
 	print(food)
-	c.execute("select food_name from food where lower(food_name) like '%{0}%' ".format(food))
+	c.execute("select food_name from food where lower(food_name) like '{0}%' ".format(food))
 	food_list=c.fetchall()
 	return HttpResponse(json.dumps(food_list), content_type="application/json")

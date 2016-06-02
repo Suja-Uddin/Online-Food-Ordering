@@ -61,9 +61,16 @@ urlpatterns = patterns('',
 	url(r'^ajax_url/add_order/$',ajax.add_to_order,name='add_order'),
 
 	url(r'^food_category/(?P<category_name>([\w]+[ ]*[\w]*))/$',views.show_food_category,name='food_category'),
+
+	url(r'^search all foods/(?P<food_name>([\w]+[ ]*[\w]*))/food_category/(?P<category_name>([\w]+[ ]*[\w]*))/$',views.show_food_category_with_name,
+		name='food_category_with_name'),
 	
+	url(r'^search all foods/(?P<food_name>([\w]+[ ]*[\w]*))/food_category/(?P<category_name>([\w]+[ ]*[\w]*))/page/(?P<pagination>[\d]+)/$',views.show_food_category_with_name,
+		name='food_category_with_name_pagination'),
+
 	url(r'^food_category/(?P<category_name>([\w]+[ ]*[\w]*))/page/(?P<pagination>[\d]+)/$',views.show_food_category,name='food_category_pagination'),
 
 	url(r'^ajax_url/search area/$',ajax.search_area,name='search_area_ajax'),
+
 	url(r'^ajax_url/search food/$',ajax.search_food,name='search_food_ajax'),
 )

@@ -122,7 +122,10 @@
 <br><br>
 <br>
 <div>
-    {% if category_name %}
+    {%if food_name%}
+    <div class=" alert alert-info" style="text-align:center;font-size:1.5em;"> 
+    Search result for <strong>{{food_name}}</strong> with Food Category <strong> {{category_name}}</strong>
+    {% elif category_name %}
     <div class=" alert alert-info" style="text-align:center;font-size:1.5em;"> 
     Food Category <strong> {{category_name}}</strong>
     </div>
@@ -132,7 +135,7 @@
     Foods with price between <strong>{{price1}}</strong> and 
     <strong>  {{price2}}</strong>
     </div>
-    {%endif%} 
+    {%endif%}
 
 </div >
 <div id="login_error" style="display:none;">
@@ -186,21 +189,41 @@
     </div>
 
     <ul class="pagination">
+        {%if food_name%}
+        <li><a href="/myapp/search all foods/{{food_name}}/food_category/{{category_name}}/page/1"> << 
+        </a></li>
+        {%else%}
         <li><a href="/myapp/food_category/{{category_name}}/page/1"> << </a></li>
+        {%endif%}
+
         {% for i in pagination_list%}
         {% ifequal i pagination %}
-         <li class="active"><a href="/myapp/food_category/{{category_name}}/page/{{i}}">{{i}}</a></li>
+            {%if food_name%}
+           <li><a href="/myapp/search all foods/{{food_name}}/food_category/{{category_name}}/page/{{i}}"> {{i}} </a></li>
+            {%else%}
+            <li class="active"><a href="/myapp/food_category/{{category_name}}/page/{{i}}">{{i}}</a></li>
+            {%endif%}
+
         {% else %}
-        <li><a href="/myapp/food_category/{{category_name}}/page/{{i}}">{{i}}</a></li>
+            {%if food_name%}
+           <li><a href="/myapp/search all foods/{{food_name}}/food_category/{{category_name}}/page/{{i}}"> {{i}} </a></li>
+            {%else%}
+            <li class="active"><a href="/myapp/food_category/{{category_name}}/page/{{i}}">{{i}}</a></li>
+            {%endif%}
         {%endifequal%}
         {%endfor%}
-        <li><a href="/myapp/food_category/{{category_name}}/page/{{pagination_num}}"> >> </a></li>
+       {%if food_name%}
+        <li><a href="/myapp/search all foods/{{food_name}}/food_category/{{category_name}}/page/{{pagination_num}}"> << 
+        </a></li>
+        {%else%}
+        <li><a href="/myapp/food_category/{{category_name}}/page/{{pagination_num}}"> << </a></li>
+        {%endif%}
     </ul>
 </div>
 <script>
     $(document).ready(function()
     {
-          //jQuery.noConflict(); 
+        jQuery.noConflict(); 
           
         {% if registration_form.errors %}  
         $("#popUpWindow2").modal("show");
