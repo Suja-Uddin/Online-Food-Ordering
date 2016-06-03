@@ -1,0 +1,94 @@
+<html>
+<head>
+<style type="text/css">a {text-decoration: none}</style>
+<style>
+#entire_page
+{
+  position:relative;
+  width:100%;
+  overflow: scroll;
+  height:100%;
+  background-color:DarkKhaki;
+  margin:0;
+  padding:0;
+  top:0;
+  left:0;
+}
+#heading{
+    text-align:center;
+  background-color: LightYellow;
+  width:70%;
+    margin:0 auto;
+}
+.res_name{
+
+  text-align:left;
+  background-color: White;
+  width:100%;
+    margin:0 auto;
+    border: 1px solid Black;
+    line-height:20px;
+}
+#test{
+  background-color: White;
+  width:30%;
+  
+  margin:0 auto;
+  float=left;
+}
+#header {
+    
+    background-color: DarkKhaki;
+    color:white;
+    width:100%;
+    height:4%;
+    text-align:left;
+    padding:5px;
+    top:0;
+    left:0;
+}
+#nav {
+    line-height:20px;
+    background-color:LightGreen;
+    color: Darkblue;
+    
+    width:100px;
+    float:left;
+    padding:5px;        
+}
+</style>
+
+<body>
+
+    <div style="float:center;text-align:center;">
+        <h2>Your Order</h2>
+    </div>
+    
+    <div style="float:center;text-align:center ">
+        
+
+         <div style="float:center;text-align:center;">
+        <h4>Final Food List that you submitted!</h4>
+        <table border="1" align='center'>
+          <tr>
+            <th>Food Name</th><th>Category</th><th>Price</th><th>Ordered amount</th>
+            <th>Restaurant Info</th><th>Delivery Charge</th>
+         
+          </tr>
+          
+          {%for food in foods%}
+          
+          <tr>
+          <td>{{food.2}}</td><td>{{food.3}}</td><td>{{food.1}}</td>
+          <td>{{food.0}}</td><td>{{food.6}},{{food.4}}</td>
+          <td>{{food.5}}</td>
+          </tr>
+          {%endfor%}
+        </table>
+        <h2> Total price(including service charge) :<font color="red">{{total}}</font></h2>
+        Go to <a href="/myapp"><font color='blue'>Home </a></font> Page
+    </div>
+     </div>
+
+</body>
+</head>

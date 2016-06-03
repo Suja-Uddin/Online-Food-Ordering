@@ -211,7 +211,12 @@
           			<br>
 
             <div id="show_amount{{forloop.counter}}"> 
-              <strong> Enter amount(Between 1 and {{food.5}}</strong>
+              {%if food.5 < 0%}
+
+                <strong><font color="red"> Not available </font></strong>
+               {%else%}
+                <strong> Enter amount(Between 1 and {{food.5}} )</strong>
+               {%endif%}
             </div><br>
 
             <div class='row'>
@@ -315,10 +320,9 @@
                     if (json.login=='success')
                     {
 
-                        var amount1="meta[name='amount"+counter+"']";
-                        amount1=$(amount1).attr('content');
-                        console.log(amount);
-                        console.log(amount1);
+                        var meta_id="meta[name='amount"+counter+"']";
+                        var amount1=$(meta_id).attr('content');
+                  
                         if ( amount1-amount<0 || amount<1)
                         {
                             alert("Enter valid amount");
@@ -341,19 +345,21 @@
                                 amount:amount,
                                 menu_id:$(menu).attr('content'),
                             },
-                            success : function(json) {
-                                    alert("Successfully added to your order.You can submit your order or add more foods to your order.");   
+                            success : function(json) { 
                                     var amount=json.amount;
                                     console.log(amount)
                                     var order_div="#show_amount"+id[5];
                                     if (amount>0)
                                     {
+
+                                      alert("Successfully added to your order.You can submit your order or add more foods to your order.");  
+                                        $(meta_id).attr('content',""+amount);
                                         $(order_div).html("<strong> Enter amount(Between 1 and "+amount+"</strong>"); 
                                     }
                                     else 
                                     {
-                                        $(order_div).html("<strong>Not available!</strong>"); 
-                                        var _div="#show_amount"+id[5];
+                                      alert("Not available!");
+                                        $(order_div).html("<strong><font color='red'> Not available </font></strong>"); 
                                     }
                                     
                                 

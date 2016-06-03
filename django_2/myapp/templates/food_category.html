@@ -178,7 +178,12 @@
                 </select> 
                 <button class="btn btn-success btn-xs" type="submit" id="{{forloop.counter}}">submit</button> </p>
             <div id="show_amount{{forloop.counter}}"> 
-              <strong> Enter amount(Between 1 and {{food.7}}</strong>
+             {%if food.7 < 0%}
+
+               <strong><font color="red"> Not available </font></strong>
+             {%else%}
+              <strong> Enter amount(Between 1 and {{food.7}} )</strong>
+             {%endif%}
             </div><br>
             <input class='form-control' size="10" type="number" id="amount{{forloop.counter}}" >
             <p align='center'> <button type="submit" class="btn btn-success" id="order{{forloop.counter}}" value="{{forloop.counter}}">Add to Cart</button> </p>
@@ -194,6 +199,9 @@
         {%if food_name%}
         <li><a href="/myapp/search all foods/{{food_name}}/food_category/{{category_name}}/page/1"> << 
         </a></li>
+        {%elif price1%}
+        <li><a href="/myapp/foods/price_category/{{price1}}/{{price2}}/page/1"> << </a>
+        </li>
         {%else%}
         <li><a href="/myapp/food_category/{{category_name}}/page/1"> << </a></li>
         {%endif%}
@@ -201,7 +209,10 @@
         {% for i in pagination_list%}
         {% ifequal i pagination %}
             {%if food_name%}
-           <li><a href="/myapp/search all foods/{{food_name}}/food_category/{{category_name}}/page/{{i}}"> {{i}} </a></li>
+           <li class="active"><a href="/myapp/search all foods/{{food_name}}/food_category/{{category_name}}/page/{{i}}"> {{i}} </a></li>
+            {%elif price1%}
+            <li class="active"><a href="/myapp/foods/price_category/{{price1}}/{{price2}}/page/{{i}}"> {{i}} </a>
+            </li>
             {%else%}
             <li class="active"><a href="/myapp/food_category/{{category_name}}/page/{{i}}">{{i}}</a></li>
             {%endif%}
@@ -209,14 +220,20 @@
         {% else %}
             {%if food_name%}
            <li><a href="/myapp/search all foods/{{food_name}}/food_category/{{category_name}}/page/{{i}}"> {{i}} </a></li>
+            {%elif price1%}
+            <li ><a href="/myapp/foods/price_category/{{price1}}/{{price2}}/page/{{i}}"> {{i}} </a>
+            </li>
             {%else%}
-            <li class="active"><a href="/myapp/food_category/{{category_name}}/page/{{i}}">{{i}}</a></li>
+            <li ><a href="/myapp/food_category/{{category_name}}/page/{{i}}">{{i}}</a></li>
             {%endif%}
         {%endifequal%}
         {%endfor%}
        {%if food_name%}
         <li><a href="/myapp/search all foods/{{food_name}}/food_category/{{category_name}}/page/{{pagination_num}}"> >> 
         </a></li>
+        {%elif price1%}
+            <li ><a href="/myapp/foods/price_category/{{price1}}/{{price2}}/page/{{pagination_num}}"> >> </a>
+            </li>
         {%else%}
         <li><a href="/myapp/food_category/{{category_name}}/page/{{pagination_num}}"> >> </a></li>
         {%endif%}
@@ -225,6 +242,7 @@
 <script>
     $(document).ready(function()
     {
+
         jQuery.noConflict(); 
           
         {% if registration_form.errors %}  
@@ -274,11 +292,9 @@
                     if (json.login=='success')
                     {
 
-                        var amount1="meta[name='amount"+counter+"']";
-                        amount1=$(amount1).attr('content');
-                        console.log(amount);
-                        console.log(amount1);
-                        console.log(amount1-amount);
+                        var meta_id="meta[name='amount"+counter+"']";
+                        var amount1=$(meta_id).attr('content');
+    
                         if ( amount1-amount<0 || amount<1)
                         {
                             alert("Enter valid amount");
@@ -302,17 +318,20 @@
                                 menu_id:$(menu_id).attr('content')
                             },
                             success : function(json) {
-                                    alert("Successfully added to your order.You can submit your order or add more foods to your order.");  
+                                    
                                     var amount=json.amount;
                                     console.log(amount)
                                     var order_div="#show_amount"+id[5];
                                     if (amount>0)
                                     {
-                                        $(order_div).html("<strong> Enter amount(Between 1 and "+amount+"</strong>"); 
+                                        alert("Successfully added to your order.You can submit your order or add more foods to your order.");  
+                                        $(meta_id).attr('content',""+amount);
+                                        $(order_div).html("<strong> Enter amount(Between 1 and "+amount+"</strong>)"); 
                                     }
                                     else 
                                     {
-                                        $(order_div).html("<strong>Not available!</strong>"); 
+                                        alert("Not available!");
+                                        $(order_div).html("<strong><font color='red'> Not available </font></strong>"); 
                                     }
                                 
                             },

@@ -11,6 +11,8 @@ urlpatterns = patterns('',
 		#show all foods in price range
 	url(r'^foods/price_category/$',views.price_category,name='price_category'),
 
+	url(r'^foods/price_category/(?P<price1>[\d]+)/(?P<price2>[\d]+)/page/(?P<pagination>[\d]+)/$',views.price_category,name='price_category_pagination'),
+
 	url(r'^search all foods/(?P<food>[\w]+)/page/(?P<pagination>[\d]+)/$',views.search_food,
 		name='search_food_pagination'),
 
@@ -52,6 +54,8 @@ urlpatterns = patterns('',
 	url(r'^restaurants/branches/(?P<restaurant_id>[\d]+)/page/(?P<pagination>[\d]+)/$',views.show_branches,name='branches_pagination'),
 
 	url(r'^order/$',views.take_order,name='order'),
+
+	url(r'^order/(?P<order_id>[\d]+)/success/$',views.order_submit,name='order_submit'),
 
 	url(r'^foods/price_category/$',views.price_category,name='price_category'),
 

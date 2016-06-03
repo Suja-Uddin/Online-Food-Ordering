@@ -1,5 +1,18 @@
 <html>
-<head>
+<head>   {% load staticfiles %} {% load bootstrap3 %}
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{% static "bootstrap.min.css" %}">
+  <script src="{% static "jquery.min.js" %}"></script>
+  <script src="{% static "bootstrap.min.js" %}"></script>
+
+  <meta charset="utf-8">
+
+   <link rel="stylesheet" href="{% static "jquery-ui.css" %}">
+  <script src="{% static "jquery-ui.js" %}"></script>
+  <script src="{% static "jquery-1.10.2.js" %}"></script>
+
+</head>
+
 <style type="text/css">a {text-decoration: none}</style>
 <style>
 #entire_page
@@ -60,50 +73,56 @@
 
 <body>
 
-    <div style="float:center;text-align:center;">
-        <h2>Your Order</h2>
+    <div id="heading">
+      <div class=" alert alert-info" style="text-align:center;font-size:1.5em;"> 
+        <strong>Your order</strong>
+      </div>
     </div>
     
-    <div style="float:center;text-align:center ">
-      <form action="{%url 'myapp:order' %}" method="POST"> 
-        {% csrf_token %}
-        <table align='center'>
-        {% for field in form %}
-          <tr>
-            <th align='left'>{{field.label_tag}}</th> 
-            <td>
-              
-              {{ field }}
-              
-            </td>
-            <td>{{ field.errors }}</td>
-          </tr>
-        {% endfor %}
-      </table>
-         <div style="float:center;text-align:center;">
-        <h4>Food List</h4>
-        <table border="1" align='center'>
-          <tr>
-            <th>Food Name</th><th>Category</th><th>Price</th><th>Ordered amount</th>
-            <th>Restaurant Info</th><th>Delivery Charge</th>
-            <th> Tick to order food</th>
-          </tr>
-          
-          {%for food in order_list%}
-          
+    <div class='row'>
+      <div class='col-md-1'></div>
+      <div class='col-md-10'>
 
-          <tr>
-          <td>{{food.2}}</td><td>{{food.3}}</td><td>{{food.1}}</td>
-          <td>{{food.0}}</td><td>{{food.6}},{{food.4}}</td>
-          <td>{{food.5}}</td>
-          <td><input type="checkbox" name="checks[]" value="{{food.7}}" />
-          </tr>
-          {%endfor%}
-        </table>
-    </div>
-    <input type="submit" value="submit order" />
+        <form action="{%url 'myapp:order' %}" method="POST"> 
+          {% csrf_token %}
+          <table align='center'>
+            {% for field in form %}
+              <tr>
+                <td>
+                  {% bootstrap_field field %}
+                  
+                </td>
+              </tr>
+            {% endfor %}
+
+          </table>
+    
+          <div class='well'>
+            <p align='center' > <strong>Food List </strong> </p>
+            <table  class='table table-hover'>
+              <tr>
+                <th>Food Name</th><th>Category</th><th>Price</th><th>Ordered amount</th>
+                <th>Restaurant Info</th><th>Delivery Charge</th>
+                <th> Tick to order food</th>
+              </tr>
+              
+              {%for food in order_list%}
+              
+
+              <tr>
+              <td>{{food.2}}</td><td>{{food.3}}</td><td>{{food.1}}</td>
+              <td>{{food.0}}</td><td>{{food.6}},{{food.4}}</td>
+              <td>{{food.5}}</td>
+              <td><input type="checkbox" name="checks[]" value="{{food.7}}" checked/>
+              </tr>
+              {%endfor%}
+            </table>
+          </div>
+        <p align='center'> <button class="btn btn-success" type="submit"> submit order</button> </p>
         </form>
-     </div>
+      </div>
+      <div class='col-md-1'></div>
+    </div>
 
 </body>
 </head>

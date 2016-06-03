@@ -259,77 +259,6 @@ def area_food_category(request,area,category_name):
 			foods[i].append(ii[4])
 		i+=1
 	return render(request,"food_category.html",{'foods':foods,'category_name':category_name})
-def take_order(request):
-	c=connection.cursor()
-	temp=[]
-	name=request.user.username
-	print(name)
-	order_list=[]
-	c.execute("select customer_id from customer where username=%s",(name,))
-	
-	temp1=c.fetchone()
-	print(temp1)
-	c.execute("select order_id from foodorder where customer_id=%s and is_submitted=0",(temp1[0],))
-	
-	temp2=c.fetchone()
-	if not temp2:
-		raise Http404("You don't have any food in your order List.Please go to menu page and add menu to your list")
-	orderid=temp2[0]
-	#employee=temp[0]
-	c.execute("select menu_id,amount,orderinfo_id from order_info where order_id=%s",(temp2[0],))
-	#c.execute(qq)
-	temp2=c.fetchall()
-	for ii in temp2:
-		c.execute("select food_id, branch_id,price from menu where menu_id=%s and amount>=%s",(ii[0],ii[1],))
-		#c.execute(qq)
-		temp3=c.fetchone()
-		if temp3:
-			order_list.append([])
-	print(order_list)
-	if  len(order_list)==0:
-		raise Http404("You don't have any food in your order List.Please go to menu page and add menu to your list")
-	i=0
-	for ii in temp2:
-		c.execute("select food_id, branch_id,price from menu where menu_id=%s and amount>=%s",(ii[0],ii[1],))
-		#c.execute(qq)
-		temp3=c.fetchone()
-		if not temp3:
-			continue
-		order_list[i].append(ii[1]) #amount
-		order_list[i].append(temp3[2]) #price
-		#i+=1
-	
-		c.execute("select food_name, category from food where food_id=%s",(temp3[0],))
-		
-		temp4=c.fetchone()
-		order_list[i].append(temp4[0])#food name
-		order_list[i].append(temp4[1])#category
-		#i+=1
-
-		c.execute("select b.address, b.dcharge,r.restaurant_name from branch b, restaurant r\
-		 where b.restaurant_id=r.restaurant_id and b.branch_id=%s",(temp3[1],))
-		#c.execute(qq)
-		temp5=c.fetchone()
-		order_list[i].append(temp5[0]) #restaurant address
-		order_list[i].append(temp5[1])# charge
-		order_list[i].append(temp5[2])#restaurant name
-		order_list[i].append(ii[2])#orderinfo_id
-		i+=1
-	
-	print(order_list)
-	if request.method=='POST':
-		form=orderForm(request.POST)
-		if form.is_valid():
-			area_id=form.cleaned_data['area']
-			address=form.cleaned_data['address']
-			print(area_id)
-			return order_submit(request,orderid,area_id,address)
-			#return render(request,"order_success.html",RequestContext(request,{'order_list':order_list}))
-		else:
-			return render(request,"order.html",RequestContext(request,{'form':form,'order_list':order_list}))
-
-	form=orderForm();
-	return render(request,"order.html",RequestContext(request,{'orderid':orderid,'form':form,'order_list':order_list}))
 def show_menu(request,branch_id,sort_rating=0,pagination=1,form_error=0):
 	registration_form=MyRegistrationForm()
 	form=priceForm()
@@ -615,7 +544,7 @@ def show_branches(request,restaurant_id,pagination=1):
 		food_list.append(ii[0])
 	return render_to_response("branch.html",RequestContext(request,{'food_list':food_list,'user':request.user,
 		'restaurant_list':restaurant_list,'restaurant_name':restaurant_name[0],'categories':categories}))
-def price_category(request):
+def price_category(request,price1=0,price2=0,pagination=1):
 	registration_form=MyRegistrationForm()
 	if request.method=='POST':
 		if "registerButton" in request.POST:
@@ -629,15 +558,34 @@ def price_category(request):
 				price1=form.cleaned_data['price1']
 				price2=form.cleaned_data['price2']
 				c=connection.cursor()
-				c.execute("SELECT M.BRANCH_ID,F.food_name,M.PRICE,find_rating(m.menu_id),M.menu_id \
+				c.execute("SELECT M.BRANCH_ID,F.food_name,M.PRICE,find_rating(m.menu_id),M.menu_id,M.amount\
 				FROM FOOD F, MENU M WHERE F.FOOD_ID=M.FOOD_ID AND M.price>=%s and M.price<=%s\
 				 order by m.price",(price1,price2,))
 				info=c.fetchall()
+
+
+				i=0
+
+				pagination=int (pagination)
+				pagination_num=len(info)/9
+				start=9*(pagination-1)
+				end=start+9
+				info=info[start:end]
+				pagination_num=int(ceil(pagination_num))
+				pagination_list=[]
+				if pagination>2:
+					pagination_list.append(pagination-2)
+				if pagination>1:
+					pagination_list.append(pagination-1)
+				pagination_list.append(pagination)
+				if pagination+1<=pagination_num:
+					pagination_list.append(pagination+1)
+				if pagination+2<=pagination_num:
+					pagination_list.append(pagination+2)
+
 				foods=[]
 				for ii in info:
 					foods.append([])
-
-				i=0
 				for ii in info:
 					c.execute("select r.restaurant_name,b.ADDRESS from restaurant r , branch b\
 					 where r.restaurant_id=b.restaurant_id and b.branch_id=%s",(ii[0],))
@@ -650,12 +598,191 @@ def price_category(request):
 					foods[i].append(temp[0])
 					foods[i].append(temp[1])
 					foods[i].append(ii[4])
+					foods[i].append(ii[5])
 					i+=1
 				category_name=''	
 				return render(request,"food_category.html",{'registration_form':registration_form,
-					'foods':foods,'price1':price1,'price2':price2})
+					'foods':foods,'price1':price1,'price2':price2,'pagination_num':pagination_num,
+					'pagination':pagination,'pagination_list':pagination_list})
 			args={}
 			args.update(csrf(request))
 			args['form']=form
 			return index(request,1)
+	
+	if price1!=0 and price2!=0:
+		registration_form=MyRegistrationForm()
+		c=connection.cursor()
+		c.execute("SELECT M.BRANCH_ID,F.food_name,M.PRICE,find_rating(m.menu_id),M.menu_id,M.amount\
+		FROM FOOD F, MENU M WHERE F.FOOD_ID=M.FOOD_ID AND M.price>=%s and M.price<=%s\
+		 order by m.price",(price1,price2,))
+		info=c.fetchall()
+
+		i=0
+		pagination=int (pagination)
+		pagination_num=len(info)/9
+		start=9*(pagination-1)
+		end=start+9
+		info=info[start:end]
+		pagination_num=int(ceil(pagination_num))
+		pagination_list=[]
+		if pagination>2:
+			pagination_list.append(pagination-2)
+		if pagination>1:
+			pagination_list.append(pagination-1)
+		pagination_list.append(pagination)
+		if pagination+1<=pagination_num:
+			pagination_list.append(pagination+1)
+		if pagination+2<=pagination_num:
+			pagination_list.append(pagination+2)
+
+		foods=[]
+		for ii in info:
+			foods.append([])
+		for ii in info:
+			c.execute("select r.restaurant_name,b.ADDRESS from restaurant r , branch b\
+			 where r.restaurant_id=b.restaurant_id and b.branch_id=%s",(ii[0],))
+			temp=c.fetchone()
+
+			foods[i].append(ii[0]) #branch
+			foods[i].append(ii[1]) #name
+			foods[i].append(ii[2]) 
+			foods[i].append(ii[3])
+			foods[i].append(temp[0])
+			foods[i].append(temp[1])
+			foods[i].append(ii[4])
+			foods[i].append(ii[5])
+			i+=1
+		category_name=''	
+		return render(request,"food_category.html",{'registration_form':registration_form,
+			'foods':foods,'price1':price1,'price2':price2,'pagination_num':pagination_num,
+			'pagination':pagination,'pagination_list':pagination_list})
 	return index(request,1)
+def order_submit(request,order_id,area_id='NULL',address='NULL'):
+	orderinfo_list=request.POST.getlist('checks[]')
+	#print("check list")
+	print(orderinfo_list)
+	temp2=[]
+	order_list=[]
+	c=connection.cursor()
+	print(address)
+	for ii in orderinfo_list:
+		c.execute("update order_info set is_checked=1 where orderinfo_id={0}".format(ii))
+		
+	c.execute("update foodorder set is_submitted=1,area_id=%s,address=%s,\
+		order_date=sysdate,status=0 where order_id=%s",(area_id,address,order_id,))
+
+	for ii in orderinfo_list:
+		c.execute("select menu_id,amount from order_info where orderinfo_id=%s",(ii,))
+		#c.execute(qq)
+		temp3=c.fetchone()
+		temp2.append(temp3)
+
+	for ii in temp2:
+		order_list.append([])
+	i=0
+	total=0
+	bb=set()
+	for ii in temp2:
+		c.execute("select food_id, branch_id,price from menu where menu_id=%s",(ii[0],))
+		
+		temp3=c.fetchone()
+		#print(temp3[2])
+		order_list[i].append(ii[1]) #amount
+		order_list[i].append(temp3[2]) #price
+		total+=(temp3[2]*ii[1])
+		#i+=1
+		#c.execute("update menu set amount=amount-%s where menu_id=%s",(ii[1],ii[0],))
+		#c.execute("commit;")
+		c.execute("select food_name, category from food where food_id=%s",(temp3[0],))
+		#c.execute(qq)
+		temp4=c.fetchone()
+		order_list[i].append(temp4[0])#food name
+		order_list[i].append(temp4[1])#category
+		#i+=1
+		print(temp4[0])
+		c.execute("select b.address, b.dcharge,r.restaurant_name from branch b, restaurant r\
+		 where b.restaurant_id=r.restaurant_id and b.branch_id=%s",(temp3[1],))
+		
+		temp5=c.fetchone()
+		order_list[i].append(temp5[0]) #restaurant address
+		order_list[i].append(temp5[1])# charge
+		order_list[i].append(temp5[2])#restaurant name
+		if temp3[1] not in bb:
+			total+=temp5[1]
+			bb.add(temp3[1])
+
+		i+=1
+
+	c.callproc("update_bill",(request.user.username,total))
+	return render(request,"order_success.html",RequestContext(request,{'foods':order_list,'total':total}))
+def take_order(request):
+	c=connection.cursor()
+	temp=[]
+	name=request.user.username
+	print(name)
+	order_list=[]
+	c.execute("select customer_id from customer where username=%s",(name,))
+	
+	temp1=c.fetchone()
+	print(temp1)
+	c.execute("select order_id from foodorder where customer_id=%s and is_submitted=0",(temp1[0],))
+	
+	temp2=c.fetchone()
+	if not temp2:
+		raise Http404("You don't have any food in your order List.Please go to menu page and add menu to your list")
+	orderid=temp2[0]
+	#employee=temp[0]
+	c.execute("select menu_id,amount,orderinfo_id from order_info where order_id=%s",(temp2[0],))
+	#c.execute(qq)
+	temp2=c.fetchall()
+	for ii in temp2:
+		c.execute("select food_id, branch_id,price from menu where menu_id=%s and amount>=%s",(ii[0],ii[1],))
+		#c.execute(qq)
+		temp3=c.fetchone()
+		if temp3:
+			order_list.append([])
+	print(order_list)
+	if  len(order_list)==0:
+		raise Http404("You don't have any food in your order List.Please go to menu page and add menu to your list")
+	i=0
+	for ii in temp2:
+		c.execute("select food_id, branch_id,price from menu where menu_id=%s and amount>=%s",(ii[0],ii[1],))
+		#c.execute(qq)
+		temp3=c.fetchone()
+		if not temp3:
+			continue
+		order_list[i].append(ii[1]) #amount
+		order_list[i].append(temp3[2]) #price
+		#i+=1
+	
+		c.execute("select food_name, category from food where food_id=%s",(temp3[0],))
+		
+		temp4=c.fetchone()
+		order_list[i].append(temp4[0])#food name
+		order_list[i].append(temp4[1])#category
+		#i+=1
+
+		c.execute("select b.address, b.dcharge,r.restaurant_name from branch b, restaurant r\
+		 where b.restaurant_id=r.restaurant_id and b.branch_id=%s",(temp3[1],))
+		#c.execute(qq)
+		temp5=c.fetchone()
+		order_list[i].append(temp5[0]) #restaurant address
+		order_list[i].append(temp5[1])# charge
+		order_list[i].append(temp5[2])#restaurant name
+		order_list[i].append(ii[2])#orderinfo_id
+		i+=1
+	
+	print(order_list)
+	if request.method=='POST':
+		form=orderForm(request.POST)
+		if form.is_valid():
+			area_id=form.cleaned_data['area']
+			address=form.cleaned_data['address']
+			print(area_id)
+			return order_submit(request,orderid,area_id,address)
+			#return render(request,"order_success.html",RequestContext(request,{'order_list':order_list}))
+		else:
+			return render(request,"order.html",RequestContext(request,{'form':form,'order_list':order_list}))
+
+	form=orderForm();
+	return render(request,"order.html",RequestContext(request,{'orderid':orderid,'form':form,'order_list':order_list}))
