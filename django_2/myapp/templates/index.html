@@ -53,6 +53,8 @@
         <li><a href="{%url 'myapp:all_restaurants'%}">All Restaurants</a></li>
         {%if user.is_authenticated%}
         <li><a href="{%url 'myapp:order' %}">Submit Your order</a></li>
+        
+        <li><a href="{%url 'myapp:show_orders'%}">Previous Orders</a></li>
         {%endif%}
       </ul>
 

@@ -1,5 +1,18 @@
 <html>
-<head>
+<head>   {% load staticfiles %} {% load bootstrap3 %}
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{% static "bootstrap.min.css" %}">
+  <script src="{% static "jquery.min.js" %}"></script>
+  <script src="{% static "bootstrap.min.js" %}"></script>
+
+  <meta charset="utf-8">
+
+   <link rel="stylesheet" href="{% static "jquery-ui.css" %}">
+  <script src="{% static "jquery-ui.js" %}"></script>
+  <script src="{% static "jquery-1.10.2.js" %}"></script>
+
+</head>
+
 <style type="text/css">a {text-decoration: none}</style>
 <style>
 #entire_page
@@ -57,38 +70,57 @@
     padding:5px;        
 }
 </style>
-
+<nav class="navbar navbar-inverse navbar-fixed-top" >
+  
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>                        
+      </button>
+      <strong><a class="navbar-brand" href="{%url 'myapp:index'%}"><font color='lime'>Online Food Ordering</font></a></strong>
+    </div>
+    <div class="collapse navbar-collapse" id="myNavbar">
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="{%url 'myapp:index' %}">Home</a></li>
+        <li><a href="{%url 'myapp:all_restaurants'%}">All Restaurants</a></li>
+        {%if user.is_authenticated%}
+        <li><a href="{%url 'myapp:order' %}">Submit Your order</a></li>
+        <li><a href="{%url 'myapp:show_orders'%}">Previous Orders</a></li>
+        {%endif%}
+      </ul>
+    </div>
+    </div>
+</nav>
+<br><br><br>
 <body>
 
-    <div style="float:center;text-align:center;">
-        <h2>Your Order</h2>
+    <div id="heading">
+      <div class=" alert alert-info" style="text-align:center;font-size:1.5em;"> 
+        <strong>Your submitted food list</strong>
+      </div>
     </div>
-    
-    <div style="float:center;text-align:center ">
-        
-
-         <div style="float:center;text-align:center;">
-        <h4>Final Food List that you submitted!</h4>
-        <table border="1" align='center'>
-          <tr>
-            <th>Food Name</th><th>Category</th><th>Price</th><th>Ordered amount</th>
-            <th>Restaurant Info</th><th>Delivery Charge</th>
-         
-          </tr>
-          
-          {%for food in foods%}
-          
-          <tr>
-          <td>{{food.2}}</td><td>{{food.3}}</td><td>{{food.1}}</td>
-          <td>{{food.0}}</td><td>{{food.6}},{{food.4}}</td>
-          <td>{{food.5}}</td>
-          </tr>
-          {%endfor%}
-        </table>
-        <h2> Total price(including service charge) :<font color="red">{{total}}</font></h2>
-        Go to <a href="/myapp"><font color='blue'>Home </a></font> Page
+    <div class='well'>
+      <div style="float:center;text-align:center ">
+          <table class='table table-hover' align='center'>
+            <tr>
+              <th>Food Name</th><th>Category</th><th>Price</th><th>Ordered amount</th>
+              <th>Restaurant Info</th><th>Delivery Charge</th>
+           
+            </tr>
+            
+            {%for food in foods%}
+            
+            <tr>
+            <td>{{food.2}}</td><td>{{food.3}}</td><td>{{food.1}}</td>
+            <td>{{food.0}}</td><td>{{food.6}},{{food.4}}</td>
+            <td>{{food.5}}</td>
+            </tr>
+            {%endfor%}
+          </table>
+          <h3>Total price(including service charge) :<font color="red">{{total}}</font></h3>
+          <h4>Thanks for your order!Please wait a little longer till the food reaches your address</h4>
+      </div>
     </div>
-     </div>
-
 </body>
-</head>

@@ -25,14 +25,16 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>                        
       </button>
-      <strong><a class="navbar-brand" href="#"><font color='lime'>Online Food Ordering</font></a></strong>
+      <strong><a class="navbar-brand" href="{%url 'myapp:index'%}"><font color='lime'>Online Food Ordering</font></a></strong>
     </div>
     <div class="collapse navbar-collapse" id="myNavbar">
       <ul class="nav navbar-nav">
-        <li class="active"><a href="#">Home</a></li>
+        <li class="active"><a href="{%url 'myapp:index'%}">Home</a></li>
         <li><a href="{%url 'myapp:all_restaurants'%}">All Restaurants</a></li>
         {%if user.is_authenticated%}
         <li><a href="{%url 'myapp:order' %}">Submit Your order</a></li>
+        
+        <li><a href="{%url 'myapp:show_orders'%}">Previous Orders</a></li>
         {%endif%}
       </ul>
 

@@ -32,6 +32,7 @@
         {%if user.is_authenticated%}
         <li><a href="{%url 'myapp:order' %}">Submit Your order</a></li>
         {%endif%}
+        <li><a href="{%url 'myapp:show_orders'%}">Previous Orders</a></li>
       </ul>
 
       <ul class="nav navbar-nav navbar-right">
@@ -178,7 +179,7 @@
                 </select> 
                 <button class="btn btn-success btn-xs" type="submit" id="{{forloop.counter}}">submit</button> </p>
             <div id="show_amount{{forloop.counter}}"> 
-             {%if food.7 < 0%}
+             {%if food.7 < 1%}
 
                <strong><font color="red"> Not available </font></strong>
              {%else%}
@@ -194,7 +195,7 @@
     {%endfor%}
      </div>
     </div>
-
+    <div class="text-center">
     <ul class="pagination">
         {%if food_name%}
         <li><a href="/myapp/search all foods/{{food_name}}/food_category/{{category_name}}/page/1"> << 
@@ -238,6 +239,7 @@
         <li><a href="/myapp/food_category/{{category_name}}/page/{{pagination_num}}"> >> </a></li>
         {%endif%}
     </ul>
+    </div>
 </div>
 <script>
     $(document).ready(function()
@@ -322,15 +324,14 @@
                                     var amount=json.amount;
                                     console.log(amount)
                                     var order_div="#show_amount"+id[5];
+                                    alert("Successfully added to your order.You can submit your order or add more foods to your order.");  
+                                    $(meta_id).attr('content',""+amount);
                                     if (amount>0)
                                     {
-                                        alert("Successfully added to your order.You can submit your order or add more foods to your order.");  
-                                        $(meta_id).attr('content',""+amount);
                                         $(order_div).html("<strong> Enter amount(Between 1 and "+amount+"</strong>)"); 
                                     }
                                     else 
                                     {
-                                        alert("Not available!");
                                         $(order_div).html("<strong><font color='red'> Not available </font></strong>"); 
                                     }
                                 

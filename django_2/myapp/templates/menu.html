@@ -38,6 +38,7 @@
         <li><a href="{%url 'myapp:all_restaurants'%}">All Restaurants</a></li>
         {%if user.is_authenticated%}
         <li><a href="{%url 'myapp:order' %}">Submit Your order</a></li>
+        <li><a href="{%url 'myapp:show_orders'%}">Previous Orders</a></li>
         {%endif%}
       </ul>
 
@@ -191,7 +192,7 @@
           			{%if food_search%}
           			Restaurant:<font color='blue'>{{food.6}},{{food.7}}</font><br>
           			{%endif%}
-                {{food.3}}
+                
           			<meta name="menu_id{{forloop.counter}}" content="{{food.3}}" />
                 <meta name="amount{{forloop.counter}}" content="{{food.5}}" />
           			Give rating:
@@ -211,7 +212,7 @@
           			<br>
 
             <div id="show_amount{{forloop.counter}}"> 
-              {%if food.5 < 0%}
+              {%if food.5 < 1%}
 
                 <strong><font color="red"> Not available </font></strong>
                {%else%}
@@ -251,20 +252,38 @@
     {%endif%}
   </div>
 </div>
+{%if pagination_num%}
+<div class="text-center">
 <ul class="pagination">
+
+
 	{% if search_name%}
-    <li><a href="/myapp/search all foods/{{search_name}}/page/1"> << </a></li>
+        <li><a href="/myapp/search all foods/{{search_name}}/page/1"> << </a></li>
     {% for i in pagination_list%}
     {% ifequal i pagination %}
      <li class="active"><a href="/myapp/search all foods/{{search_name}}/page/{{i}}">
-     	{{i}}</a></li>
+      {{i}}</a></li>
     {% else %}
     <li><a href="/myapp/search all foods/{{search_name}}/page/{{i}}">{{i}}</a></li>
     {%endifequal%}
     {%endfor%}
     <li><a href="/myapp/search all foods/{{search_name}}/page/{{pagination_num}}"> >> </a></li>
-    {%endif %}
+  {%else%}
+
+    <li><a href="/myapp/restaurants/{{branch}}/page/1"> << </a></li>
+    {% for i in pagination_list%}
+    {% ifequal i pagination %}
+     <li class="active"><a href="/myapp/restaurants/{{branch}}/page/{{i}}">
+      {{i}}</a></li>
+    {% else %}
+    <li><a href="/myapp/restaurants/{{branch}}/page/{{i}}">{{i}}</a></li>
+    {%endifequal%}
+    {%endfor%}
+    <li><a href="/myapp/restaurants/{{branch}}/page/{{pagination_num}}"> >> </a></li>
+  {%endif %}
 </ul>
+</div>
+{%endif%}
 </div>
 <script>
 	$(document).ready(function()
@@ -335,7 +354,7 @@
                             var food_id=$(menu_id).attr('content');
 
                             
-                                    console.log($(menu).attr('content'));
+                            console.log($(menu).attr('content'));
                             $.ajax({
                             type: "POST",
                             url: "{% url 'myapp:add_order' %}",
@@ -349,16 +368,15 @@
                                     var amount=json.amount;
                                     console.log(amount)
                                     var order_div="#show_amount"+id[5];
+
+                                    alert("Successfully added to your order.You can submit your order or add more foods to your order.");  
+                                      $(meta_id).attr('content',""+amount);
                                     if (amount>0)
                                     {
-
-                                      alert("Successfully added to your order.You can submit your order or add more foods to your order.");  
-                                        $(meta_id).attr('content',""+amount);
-                                        $(order_div).html("<strong> Enter amount(Between 1 and "+amount+"</strong>"); 
+                                        $(order_div).html("<strong> Enter amount(Between 1 and "+amount+"</strong>)"); 
                                     }
                                     else 
                                     {
-                                      alert("Not available!");
                                         $(order_div).html("<strong><font color='red'> Not available </font></strong>"); 
                                     }
                                     

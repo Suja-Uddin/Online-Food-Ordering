@@ -71,9 +71,40 @@
 }
 </style>
 
+<nav class="navbar navbar-inverse navbar-fixed-top" >
+  
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>                        
+      </button>
+      <strong><a class="navbar-brand" href="{%url 'myapp:index'%}"><font color='lime'>Online Food Ordering</font></a></strong>
+    </div>
+    <div class="collapse navbar-collapse" id="myNavbar">
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="{%url 'myapp:index' %}">Home</a></li>
+        <li><a href="{%url 'myapp:all_restaurants'%}">All Restaurants</a></li>
+        {%if user.is_authenticated%}
+        <li><a href="{%url 'myapp:order' %}">Submit Your order</a></li>
+        <li><a href="{%url 'myapp:show_orders'%}">Previous Orders</a></li>
+        {%endif%}
+      </ul>
+    </div>
+    </div>
+</nav>
+<br><br><br>
 <body>
 
     <div id="heading">
+      {%if no_food%}
+        <div class=" alert alert-info" style="text-align:center;font-size:1.5em;"> 
+        <h2><strong>There is no food in your order list!<br></h2> Please go to the food section 
+          and add your desired food to your order list by clicking 'Add to Cart' button !<br>
+        </strong>
+        </div>
+      {%else%}
       <div class=" alert alert-info" style="text-align:center;font-size:1.5em;"> 
         <strong>Your order</strong>
       </div>
@@ -107,11 +138,13 @@
               </tr>
               
               {%for food in order_list%}
-              
-
+  
               <tr>
-              <td>{{food.2}}</td><td>{{food.3}}</td><td>{{food.1}}</td>
-              <td>{{food.0}}</td><td>{{food.6}},{{food.4}}</td>
+              <td>{{food.2}}</td>
+              <td><a href="{%url 'myapp:branch_food_category' food.8 food.3 %}"> {{food.3}} </a></td>
+              <td>{{food.1}}</td>
+              <td>{{food.0}}</td>
+              <td><a href="{%url 'myapp:menu_list' food.8 %}"> {{food.6}},{{food.4}} </a></td>
               <td>{{food.5}}</td>
               <td><input type="checkbox" name="checks[]" value="{{food.7}}" checked/>
               </tr>
@@ -123,6 +156,6 @@
       </div>
       <div class='col-md-1'></div>
     </div>
-
+    {%endif%}
 </body>
 </head>

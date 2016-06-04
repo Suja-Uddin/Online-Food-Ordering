@@ -76,4 +76,7 @@ urlpatterns = patterns('',
 	url(r'^ajax_url/search area/$',ajax.search_area,name='search_area_ajax'),
 
 	url(r'^ajax_url/search food/$',ajax.search_food,name='search_food_ajax'),
+
+	url(r'^show orders/$',views.show_orders,name='show_orders'),
+	url(r'^show orders/page/(?P<pagination>[\d]+)/$',views.show_orders,name='show_orders_pagination'),
 )

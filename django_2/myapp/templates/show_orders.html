@@ -1,0 +1,102 @@
+<html>
+<head>   {% load staticfiles %} {% load bootstrap3 %}
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{% static "bootstrap.min.css" %}">
+  <script src="{% static "jquery.min.js" %}"></script>
+  <script src="{% static "bootstrap.min.js" %}"></script>
+
+  <meta charset="utf-8">
+
+   <link rel="stylesheet" href="{% static "jquery-ui.css" %}">
+  <script src="{% static "jquery-ui.js" %}"></script>
+  <script src="{% static "jquery-1.10.2.js" %}"></script>
+
+</head>
+
+<style type="text/css">a {text-decoration: none}</style>
+
+<body>
+<nav class="navbar navbar-inverse navbar-fixed-top" >
+  
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>                        
+      </button>
+      <strong><a class="navbar-brand" href="{%url 'myapp:index'%}"><font color='lime'>Online Food Ordering</font></a></strong>
+    </div>
+    <div class="collapse navbar-collapse" id="myNavbar">
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="{%url 'myapp:index' %}">Home</a></li>
+        <li><a href="{%url 'myapp:all_restaurants'%}">All Restaurants</a></li>
+        {%if user.is_authenticated%}
+        <li><a href="{%url 'myapp:order' %}">Submit Your order</a></li>
+        {%endif%}
+      </ul>
+    </div>
+    </div>
+</nav>
+<br><br><br>
+<div id="heading">
+      <div class=" alert alert-info" style="text-align:center;font-size:1.5em;"> 
+        <strong>All orders</strong>
+      </div>
+</div>
+<div class='row'>
+	<div class='col-md-1'></div>
+	<div class='col-md-10'>
+	{%for order in order_list%}
+		{%if order%}
+		<div class='well'>
+		<table  class='table table-hover'>
+			  <tr>
+			  	<th>Order Date: {{order.0}}</th>
+			  </tr>
+	          <tr>
+	            <th>Food Name</th><th>Category</th><th>Price</th><th>Ordered amount</th>
+	            <th>Restaurant Info</th><th>Delivery Charge</th>
+	          </tr>
+	          
+	          {%for food in order%}
+	          {%ifequal food order.0%}
+	          {%else%}
+	          <tr>
+	          <td>{{food.2}}</td>
+	          <td><a href="{%url 'myapp:branch_food_category' food.8 food.3 %}"> {{food.3}} </a></td>
+	          <td>{{food.1}}</td>
+	          <td>{{food.0}}</td>
+	          <td><a href="{%url 'myapp:menu_list' food.8 %}"> {{food.6}},{{food.4}} </a></td>
+	          <td>{{food.5}}</td>
+	          
+	          </tr>
+	          {%endifequal%}
+	          {%endfor%}
+	    </table>
+	    <br>
+	</div>
+	    {%endif%}
+
+	{%endfor%}
+	</div>
+	<div class='col-md-1'></div>
+</div>
+
+<div class="text-center">
+<ul class="pagination" >
+      <li><a href="{%url 'myapp:show_orders_pagination' 1 %}"> << </a></li>
+    {% for i in pagination_list%}
+    {% ifequal i pagination %}
+     <li class="active"><a href="{%url 'myapp:show_orders_pagination' i %}">
+      {{i}}</a></li>
+    {% else %}
+    <li><a href="{%url 'myapp:show_orders_pagination' i %}">{{i}}</a></li>
+    {%endifequal%}
+    {%endfor%}
+    <li><a href="{%url 'myapp:show_orders_pagination' pagination_num %}"> >> </a></li>
+</ul>
+</div>
+</body>
+
+</html>
