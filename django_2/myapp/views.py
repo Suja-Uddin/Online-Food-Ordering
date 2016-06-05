@@ -9,7 +9,7 @@ from collections import namedtuple
 from django.shortcuts import render_to_response 
 from django.template import RequestContext
 from django.contrib import auth
-from myapp.forms import priceForm,orderForm,MyRegistrationForm
+from myapp.forms import priceForm,orderForm,MyRegistrationForm,foodForm,restaurantForm,areaForm,branchForm,menuForm,employeeForm
 from django.http import Http404
 from django.core.context_processors import csrf
 from math import *
@@ -813,7 +813,6 @@ def take_order(request):
 
 	form=orderForm();
 	return render(request,"order.html",RequestContext(request,{'orderid':orderid,'form':form,'order_list':order_list}))
-
 def show_orders(request,pagination=1):
 	c=connection.cursor()
 	temp=[]
@@ -907,3 +906,355 @@ def show_orders(request,pagination=1):
 	
 	return render(request,"show_orders.html",RequestContext(request,{'order_list':order_list,
 		'pagination_num':pagination_num,'pagination':pagination,'pagination_list':pagination_list,}))
+
+
+def admin_site(request):
+	food_name=""
+	category_name=""
+	form=foodForm()
+	print("food_name")
+	if request.method=='POST':
+		form=foodForm(request.POST)
+		#food_name=form.cleaned_data['food']
+		if form.is_valid():
+			success="success"
+			food_name=form.cleaned_data['food']
+			category_name=form.cleaned_data['category']
+			
+			c=connection.cursor()
+			c.execute("select max(food_id) from Food")
+			id=c.fetchone()
+			print(id[0])
+			print(food_name)
+			print(category_name)
+			c.execute("insert into food values(%d,'%s','%s')"%(id[0]+1,food_name,category_name))
+			form=foodForm();
+			return render(request,"admin_base.html",RequestContext(request,{'success':success,'form':form}))
+		else:
+			error="error"
+			return render(request,"admin_base.html",RequestContext(request,{'form':form,'error':error}))
+ 
+	return render(request,"admin_base.html",RequestContext(request,{'form':form}))
+def insert_restaurant(request):
+	restaurant_name=""
+	form=restaurantForm()
+	if request.method=='POST':
+		form=restaurantForm(request.POST)
+		#food_name=form.cleaned_data['food']
+		if form.is_valid():
+			success="success"
+			restaurant_name=form.cleaned_data['restaurant']
+			
+			c=connection.cursor()
+			c.execute("select max(restaurant_id) from restaurant")
+			id=c.fetchone()
+			c.execute("insert into restaurant values(%d,'%s')"%(id[0]+1,restaurant_name))
+			form=restaurantForm();
+			return render(request,"insert_restaurant.html",RequestContext(request,{'success':success,'form':form}))
+		else:
+			error="error"
+			return render(request,"insert_restaurant.html",RequestContext(request,{'form':form,'error':error}))
+ 
+	return render(request,"insert_restaurant.html",RequestContext(request,{'form':form}))
+def insert_area(request):
+	area_name=""
+	form=areaForm()
+	if request.method=='POST':
+		form=areaForm(request.POST)
+		#food_name=form.cleaned_data['food']
+		if form.is_valid():
+			success="success"
+			area_name=form.cleaned_data['area']
+			
+			c=connection.cursor()
+			c.execute("select max(area_id) from area")
+			id=c.fetchone()
+			c.execute("insert into area values('%s',%d)"%(area_name,id[0]+1))
+			form=areaForm();
+			return render(request,"insert_area.html",RequestContext(request,{'success':success,'form':form}))
+		else:
+			error="error"
+			return render(request,"insert_area.html",RequestContext(request,{'form':form,'error':error}))
+ 
+	return render(request,"insert_area.html",RequestContext(request,{'form':form}))
+def insert_branch(request):
+	area_name=""
+	restaurant_name=""
+	address=""
+
+	dcharge=0
+	form=branchForm()
+	if request.method=='POST':
+		form=branchForm(request.POST)
+		#food_name=form.cleaned_data['food']
+		if form.is_valid():
+			success="success"
+			area_id=form.cleaned_data['area'] 
+			restaurant_id=form.cleaned_data['restaurant']
+			address=form.cleaned_data['address']
+			dcharge=form.cleaned_data['dcharge']
+			
+			print(area_id)
+			print(restaurant_id)
+			print(address)
+			print(dcharge)
+			
+			c=connection.cursor()
+			c.execute("select max(branch_id) from branch")
+			id=c.fetchone()
+			
+			c.execute("insert into branch values(%d,%s,%s,'%s',%s)"%(id[0]+1,area_id,restaurant_id,address,dcharge))
+			form=branchForm();
+			return render(request,"insert_branch.html",RequestContext(request,{'success':success,'form':form}))
+		else:
+			error="error"
+			return render(request,"insert_branch.html",RequestContext(request,{'form':form,'error':error}))
+ 
+	return render(request,"insert_branch.html",RequestContext(request,{'form':form}))
+def insert_menu(request):
+	food=""
+	branch_id=0
+	price=0
+	amount=0
+	
+	form=menuForm()
+	if request.method=='POST':
+		form=menuForm(request.POST)
+		#food_name=form.cleaned_data['food']
+		if form.is_valid():
+			success="success"
+			food_id=form.cleaned_data['food'] 
+			branch_id=form.cleaned_data['branch_id']
+			price=form.cleaned_data['price']
+			amount=form.cleaned_data['amount']
+			c=connection.cursor()
+			c.execute("select max(menu_id) from menu")
+			id=c.fetchone()
+			
+			c.execute("insert into menu values(%d,%s,%s,%s,%s)"%(id[0]+1,food_id,branch_id,price,amount))
+			form=menuForm();
+			return render(request,"insert_menu.html",RequestContext(request,{'success':success,'form':form}))
+		else:
+			error="error"
+			return render(request,"insert_menu.html",RequestContext(request,{'form':form,'error':error}))
+ 
+	return render(request,"insert_menu.html",RequestContext(request,{'form':form}))
+def insert_employee(request):
+	hire_date=""
+	salary=0
+	emp_name=""
+	phone=""
+	
+	form=employeeForm()
+	if request.method=='POST':
+		form=employeeForm(request.POST)
+		#food_name=form.cleaned_data['food']
+		if form.is_valid():
+			success="success"
+			area_id=form.cleaned_data['area'] 
+			emp_name=form.cleaned_data['name']
+			phone=form.cleaned_data['phone']
+			hire_date=form.cleaned_data['hire_date']
+			salary=form.cleaned_data['salary']
+			
+			
+			c=connection.cursor()
+			c.execute("select max(emp_id) from employee")
+			id=c.fetchone()
+			
+			c.execute("insert into Employee values(%d,%s,'%s','%s','%s',%s)"%(id[0]+1,area_id,emp_name,phone,hire_date,salary))
+			form=employeeForm();
+			return render(request,"insert_employee.html",RequestContext(request,{'success':success,'form':form}))
+		else:
+			error="error"
+			return render(request,"insert_employee.html",RequestContext(request,{'form':form,'error':error}))
+ 
+	return render(request,"insert_employee.html",RequestContext(request,{'form':form}))
+def show_tables(request):
+
+	tables=[]
+	tables.append("Area")
+	tables.append("Restaurant")
+	tables.append("Food")
+	tables.append("Branch")
+	tables.append("Menu")
+	tables.append("Employee")
+	
+
+	return render(request,"all_tables.html",RequestContext(request,{'tables':tables}))
+def delete_item(request,table_name,pagination=1):
+	c=connection.cursor()
+	if request.method=='POST':
+		delete_list=request.POST.getlist('checks[]')
+		print(delete_list)
+		for item in delete_list:
+			if table_name.upper()=="AREA":
+				c.execute("delete from AREA where area_id=%s",(item,))
+			elif table_name.upper()=="RESTAURANT":
+				c.execute("delete from restaurant where restaurant_id=%s",(item,))
+			elif table_name.upper()=="FOOD":
+				c.execute("delete from food where food_id=%s",(item,))
+			elif table_name.upper()=="BRANCH":
+				c.execute("delete from Branch where branch_id=%s",(item,))
+			elif table_name.upper()=="MENU":
+				c.execute("delete from menu where menu_id=%s",(item,))
+			elif table_name.upper()=="EMPLOYEE":
+				c.execute("delete from employee where emp_id=%s",(item,))	
+	columns=[]
+	if table_name.upper()=="AREA":
+		columns.append("Area id")
+		columns.append("Area name")
+
+	else:
+		c.execute("select COLUMN_NAME from ALL_TAB_COLUMNS where TABLE_NAME=%s",(table_name.upper(),))
+		columns=c.fetchall()
+	print(columns)
+	n=len(columns)
+	column_num=[]
+	for pp in range(0,n):
+		column_num.append(pp)
+
+	column_list=[]
+	if table_name.upper() != "AREA":
+		for col in columns:
+
+			column_list.append(col[0])
+		column_list.reverse()
+	else:
+		column_list=columns
+	
+	items=[]
+	print(table_name.upper())
+	if table_name.upper()=="AREA":
+		c.execute("select area_id,area_name from AREA order by area_name")
+	elif table_name.upper()=="RESTAURANT":
+		c.execute("select * from RESTAURANT order by restaurant_name")
+	elif table_name.upper()=="FOOD":
+		c.execute("select * from FOOD order by food_name")
+	elif table_name.upper()=="BRANCH":
+		c.execute("select * from BRANCH")
+	elif table_name.upper()=="MENU":
+		c.execute("select * from MENU")
+	elif table_name.upper()=="EMPLOYEE":
+		c.execute("select * from EMPLOYEE")	
+	
+
+
+	t=c.fetchall()
+
+	pagination=int (pagination)
+	pagination_num=len(t)/9
+	start=9*(pagination-1)
+	end=start+9
+	t=t[start:end]
+	pagination_num=int(ceil(pagination_num))
+	pagination_list=[]
+	if pagination>2:
+		pagination_list.append(pagination-2)
+	if pagination>1:
+		pagination_list.append(pagination-1)
+	pagination_list.append(pagination)
+	if pagination+1<=pagination_num:
+		pagination_list.append(pagination+1)
+	if pagination+2<=pagination_num:
+		pagination_list.append(pagination+2)
+
+
+	for ii in t:
+			items.append([])
+	i=0
+	for jj in t:
+		for kk in range (0,n):
+			items[i].append(jj[kk])
+		i+=1
+
+
+
+	return render(request,"delete_item.html",RequestContext(request,{'table_name':table_name,
+		'column_list':column_list,'items':items,'pagination_num':pagination_num,
+					'pagination':pagination,'pagination_list':pagination_list,}))
+def all_orders(request,pagination=1):
+
+	order_list=[]
+	c=connection.cursor()
+	c.execute("select order_id,customer_id,to_char(order_date,'mon dd,yyyy: hh24:mi'),emp_id,status from foodorder where is_submitted=1 order by order_date desc")
+	
+	orderlist=c.fetchall()
+
+	pagination=int (pagination)
+	pagination_num=len(orderlist)/9
+	start=9*(pagination-1)
+	end=start+9
+	orderlist=orderlist[start:end]
+	pagination_num=int(ceil(pagination_num))
+	pagination_list=[]
+	if pagination>2:
+		pagination_list.append(pagination-2)
+	if pagination>1:
+		pagination_list.append(pagination-1)
+	pagination_list.append(pagination)
+	if pagination+1<=pagination_num:
+		pagination_list.append(pagination+1)
+	if pagination+2<=pagination_num:
+		pagination_list.append(pagination+2)
+
+	order_list=[]  #final order list to be rendered
+	i=0
+	for ii in orderlist:
+		order_list.append([])
+		order_list[i].append(ii[2])  #order_date
+		c.execute("select name,address from customer where customer_id=%s",(ii[1],))
+		customer=c.fetchone()
+		print(customer)
+		order_list[i].append(customer[0]) #customer name
+		order_list[i].append(customer[1]) #customer address
+		i+=1
+
+	index=0
+	for order in orderlist:
+		print(order)
+		orderid=order[0]
+		c.execute("select menu_id,amount,orderinfo_id from order_info where order_id=%s",(orderid,))
+		menu_list=c.fetchall()
+		print(menu_list)
+		for menu in menu_list:
+			c.execute("select food_id, branch_id,price from menu where menu_id=%s",(menu[0],))
+			temp3=c.fetchone()
+			if len(temp3)!=0:
+				order_list[index].append([])
+		#print(order_list[index])
+		if  len(order_list[index])==0:
+			index+=1
+			print("continue")
+			continue
+		i=3
+		for ii in menu_list:
+			c.execute("select food_id, branch_id,price from menu where menu_id=%s",(ii[0],))
+			temp3=c.fetchone()
+			if len(temp3)==0:
+				continue
+			order_list[index][i].append(ii[1]) #amount
+			order_list[index][i].append(temp3[2]) #price
+			
+			c.execute("select food_name, category from food where food_id=%s",(temp3[0],))
+			
+			temp4=c.fetchone()
+			order_list[index][i].append(temp4[0])#food name
+			order_list[index][i].append(temp4[1])#category
+			
+			c.execute("select b.address, b.dcharge,r.restaurant_name from branch b, restaurant r\
+			 where b.restaurant_id=r.restaurant_id and b.branch_id=%s",(temp3[1],))
+			
+			temp5=c.fetchone()
+			order_list[index][i].append(temp5[0]) #restaurant address
+			order_list[index][i].append(temp5[1])# charge
+			order_list[index][i].append(temp5[2])#restaurant name
+			order_list[index][i].append(ii[2])#orderinfo_id
+			order_list[index][i].append(temp3[1])#orderinfo_id
+			i+=1
+		index+=1
+		
+	print(order_list)
+	return render(request,"admin_show_orders.html",RequestContext(request,{'pagination_num':pagination_num,
+					'pagination':pagination,'pagination_list':pagination_list,'order_list':order_list,}))
+

@@ -180,13 +180,25 @@
     <div class='col-md-9'>
     {%endif%}
         <div class='well'>
-        <div class='roww'>
         {%for food in foods%}
-          <div class="" id="menu{{forloop.counter}}">
+
+            {%ifequal forloop.counter 1%}
+
+            <div class='row'>
+            {%endifequal%}
+            {%ifequal forloop.counter 4 %}
+
+            <div class='row'>
+            {%endifequal%}
+            {%ifequal forloop.counter 7%}
+
+            <div class='row'>
+            {%endifequal%}
+          <div class="col-md-4" id="menu{{forloop.counter}}">
           		<div class='well'>
           			<p align='center' > <strong> {{food.0}} </strong>  </p>
           			Price:<font color="blue"> {{food.2}}</font> <br>
-          			Rating:<div id="rating{{forloop.counter}}"> <strong> {{food.4}}</strong></div> <br>
+          			<div id="rating{{forloop.counter}}"> Rating:<strong> {{food.4}}</strong></div>
           			Category:<font color="blue"> {{food.1}}</font><br>
 
           			{%if food_search%}
@@ -209,8 +221,7 @@
           				<option value='10'>10</option>
           			</select> 
           			<button class="btn btn-success btn-xs" type="submit" id="{{forloop.counter}}">submit</button> </p>
-          			<br>
-
+          
             <div id="show_amount{{forloop.counter}}"> 
               {%if food.5 < 1%}
 
@@ -220,18 +231,32 @@
                {%endif%}
             </div><br>
 
-            <div class='row'>
-            <div class="col-xs-4">
+            
+            {%if food.5 < 1%}
+            <input class='form-control' size="10" type="number" id="amount{{forloop.counter}}" disabled>
+            {%else%}
             <input class='form-control' size="10" type="number" id="amount{{forloop.counter}}" >
-            </div>
-            <div class="col-xs-2">
+            {%endif%}
+            
           		<div class='text-center'>
           		 <button type="submit" class="btn btn-success" id="order{{forloop.counter}}" value="{{forloop.counter}}">Add to Cart</button> 
           		</div>
-            </div>
-            </div>
+            
           </div>
           </div>
+
+        {%ifequal forloop.counter 3 %}
+
+        </div>
+        {%endifequal%}
+        {%ifequal forloop.counter 6 %}
+
+        </div>
+        {%endifequal%}
+        {%ifequal forloop.counter 9%}
+
+        </div>
+        {%endifequal%}
         {%endfor%}
         </div>
         </div>
@@ -424,7 +449,7 @@
                             console.log(rating);
                             var rating_div="#rating"+id;
                             console.log(rating_div);
-                            $(rating_div).html("<strong>"+rating+"</strong>");
+                            $(rating_div).html("Rating:<strong>"+rating+"</strong>");
 
                         },
                         error: function(data) {

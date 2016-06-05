@@ -31,8 +31,8 @@
         <li><a href="{%url 'myapp:all_restaurants'%}">All Restaurants</a></li>
         {%if user.is_authenticated%}
         <li><a href="{%url 'myapp:order' %}">Submit Your order</a></li>
-        {%endif%}
         <li><a href="{%url 'myapp:show_orders'%}">Previous Orders</a></li>
+        {%endif%}
       </ul>
 
       <ul class="nav navbar-nav navbar-right">
@@ -149,15 +149,26 @@
 
 <div class='container'>
     <div class='well'>
-    <div class='row'>
-      
     {%for food in foods%}   
         {%if food %}
+
+        {%ifequal forloop.counter 1%}
+
+        <div class='row'>
+        {%endifequal%}
+        {%ifequal forloop.counter 4 %}
+
+        <div class='row'>
+        {%endifequal%}
+        {%ifequal forloop.counter 7%}
+
+        <div class='row'>
+        {%endifequal%}
         <div class='col-md-4'>
         <div class="well" id="menu{{forloop.counter}}">
                 <p align='center' > <strong> {{food.1}} </strong>  </p>
                 Price:<strong> {{food.2}}</strong><br>
-                Rating:<div id="rating{{forloop.counter}}"> <strong> {{food.3}}</strong></div> <br>
+                <div id="rating{{forloop.counter}}"> Rating:<strong> {{food.3}}</strong></div> <br>
                 Restaurant Name:<a href="{%url 'myapp:menu_list' food.0 %}" > <strong> {{food.4}}</strong><br></a>
                 Address:<strong>{{food.5}}</strong><br>
                 <meta name="menu_id{{forloop.counter}}" content="{{food.6}}" />
@@ -186,14 +197,30 @@
               <strong> Enter amount(Between 1 and {{food.7}} )</strong>
              {%endif%}
             </div><br>
+            {%if food.7 < 1%}
+            <input class='form-control' size="10" type="number" id="amount{{forloop.counter}}" disabled>
+            {%else%}
             <input class='form-control' size="10" type="number" id="amount{{forloop.counter}}" >
+            {%endif%}
             <p align='center'> <button type="submit" class="btn btn-success" id="order{{forloop.counter}}" value="{{forloop.counter}}">Add to Cart</button> </p>
 
         </div>
         </div>
+        {%ifequal forloop.counter 3 %}
+
+        </div>
+        {%endifequal%}
+        {%ifequal forloop.counter 6 %}
+
+        </div>
+        {%endifequal%}
+        {%ifequal forloop.counter 9%}
+
+        </div>
+        {%endifequal%}
         {%endif%}
     {%endfor%}
-     </div>
+    
     </div>
     <div class="text-center">
     <ul class="pagination">
@@ -332,6 +359,7 @@
                                     }
                                     else 
                                     {
+                                        document.getElementById("amount"+counter).disabled=true;
                                         $(order_div).html("<strong><font color='red'> Not available </font></strong>"); 
                                     }
                                 
@@ -380,7 +408,7 @@
                             alert("Rating Submitted Successfully!");
                             var rating=json.rating;
                             var rating_div="#rating"+id;
-                            $(rating_div).html("<strong>"+rating+"</strong>");
+                            $(rating_div).html("Rating:<strong>"+rating+"</strong>");
 
                         },
                         error: function(data) {
