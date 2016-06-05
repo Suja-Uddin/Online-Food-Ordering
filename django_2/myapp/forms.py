@@ -5,6 +5,8 @@ from django.db import connection
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 
+
+
 class MyRegistrationForm(UserCreationForm):
 	first_name=forms.CharField()
 	last_name=forms.CharField()
@@ -66,3 +68,77 @@ class orderForm(forms.Form):
 
 	area = forms.ChoiceField(label='Enter your area',choices=temp,required=True)
 	address=forms.CharField(label='Enter the delivery address',required=True)
+
+class foodForm(forms.Form):
+	food = forms.CharField(label='Food Name')
+	category = forms.CharField(label='Category Name')
+
+class restaurantForm(forms.Form):
+	restaurant = forms.CharField(label='Restaurant Name')
+
+class areaForm(forms.Form):
+	area = forms.CharField(label='Area Name')
+	
+class branchForm(forms.Form):
+	qq="select initcap(area_name),area_id from Area order by initcap(area_name)"
+	c=connection.cursor()
+	c.execute(qq)
+	t=c.fetchall()
+
+	area_list=[]
+	
+	for ii in t:
+		
+		area_list.append((ii[1],ii[0]))
+		
+	qq="select initcap(restaurant_name),restaurant_id from Restaurant order by initcap(restaurant_name)"
+	c.execute(qq)
+	k=c.fetchall()
+
+	restaurant_list=[]
+	j=0
+	for jj in k:
+		
+		restaurant_list.append((jj[1],jj[0]))
+		j+=1
+	area = forms.ChoiceField(label='Area Name',choices=area_list,required=True)
+	restaurant = forms.ChoiceField(label='Restaurant Name',choices=restaurant_list,required=True)
+	address = forms.CharField(label='Branch Address')
+	dcharge = forms.DecimalField(label='Delivery Charge',required=True,min_value=0)
+
+
+class menuForm(forms.Form):
+	qq="select initcap(food_name),food_id from Food order by initcap(food_name)"
+	c=connection.cursor()
+	c.execute(qq)
+	t=c.fetchall()
+
+	food_list=[]
+	
+	for ii in t:
+		
+		food_list.append((ii[1],ii[0]))
+		
+	food = forms.ChoiceField(label='Food Name',choices=food_list)
+	branch_id = forms.IntegerField(label='Branch ID',required=True,min_value=0)
+	price = forms.DecimalField(label='Food Price',min_value=0)
+	amount = forms.IntegerField(label='Available Amount',required=True,min_value=0)
+
+class employeeForm(forms.Form):
+	BIRTH_YEAR_CHOICES = ('1980', '1981', '1982')
+	qq="select initcap(area_name),area_id from area order by initcap(area_name)"
+	c=connection.cursor()
+	c.execute(qq)
+	t=c.fetchall()
+
+	area_list=[]
+	
+	for ii in t:
+		
+		area_list.append((ii[1],ii[0]))
+		
+	area = forms.ChoiceField(label='Area Name',choices=area_list)
+	name = forms.CharField(label='Employee Name',required=True)
+	phone = forms.CharField(label='Phone Number')
+	hire_date = forms.DateField(label='Hire Date')
+	salary = forms.DecimalField(label='Salary',required=True,min_value=0)

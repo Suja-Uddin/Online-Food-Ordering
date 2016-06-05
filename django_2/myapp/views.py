@@ -12,7 +12,19 @@ from django.contrib import auth
 from myapp.forms import priceForm,orderForm,MyRegistrationForm,foodForm,restaurantForm,areaForm,branchForm,menuForm,employeeForm
 from django.http import Http404
 from django.core.context_processors import csrf
+import sys
+import time as _time
+from datetime import datetime, timedelta, tzinfo
+from threading import local
 
+from django.conf import settings
+from django.utils import lru_cache, six
+from django.utils.decorators import ContextDecorator
+
+try:
+    import pytz
+except ImportError:
+    pytz = None
 def index(request,form_error=0):
 
 	tmpl=loader.get_template("index.html")
@@ -550,25 +562,50 @@ def show_tables(request):
 	return render(request,"all_tables.html",RequestContext(request,{'tables':tables}))
 
 def delete_item(request,table_name):
-	
-
 	c=connection.cursor()
-	c.execute("select COLUMN_NAME from ALL_TAB_COLUMNS where TABLE_NAME=%s",(table_name.upper(),))
-	columns=c.fetchall()
+	if request.method=='POST':
+		delete_list=request.POST.getlist('checks[]')
+		print(delete_list)
+		for item in delete_list:
+			if table_name.upper()=="AREA":
+				c.execute("delete from AREA where area_id=%s",(item,))
+			elif table_name.upper()=="RESTAURANT":
+				c.execute("delete from restaurant where restaurant_id=%s",(item,))
+			elif table_name.upper()=="FOOD":
+				c.execute("delete from food where food_id=%s",(item,))
+			elif table_name.upper()=="BRANCH":
+				c.execute("delete from Branch where branch_id=%s",(item,))
+			elif table_name.upper()=="MENU":
+				c.execute("delete from menu where menu_id=%s",(item,))
+			elif table_name.upper()=="EMPLOYEE":
+				c.execute("delete from employee where emp_id=%s",(item,))	
+	columns=[]
+	if table_name.upper()=="AREA":
+		columns.append("Area id")
+		columns.append("Area name")
+
+	else:
+		c.execute("select COLUMN_NAME from ALL_TAB_COLUMNS where TABLE_NAME=%s",(table_name.upper(),))
+		columns=c.fetchall()
+	print(columns)
 	n=len(columns)
 	column_num=[]
 	for pp in range(0,n):
 		column_num.append(pp)
 
 	column_list=[]
-	for col in columns:
-		column_list.append(col[0])
-	column_list.reverse()
+	if table_name.upper() != "AREA":
+		for col in columns:
+
+			column_list.append(col[0])
+		column_list.reverse()
+	else:
+		column_list=columns
 	
 	items=[]
 	print(table_name.upper())
 	if table_name.upper()=="AREA":
-		c.execute("select * from AREA order by area_name")
+		c.execute("select area_id,area_name from AREA order by area_name")
 	elif table_name.upper()=="RESTAURANT":
 		c.execute("select * from RESTAURANT order by restaurant_name")
 	elif table_name.upper()=="FOOD":
