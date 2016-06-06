@@ -9,7 +9,11 @@ from collections import namedtuple
 from django.shortcuts import render_to_response 
 from django.template import RequestContext
 from django.contrib import auth
+<<<<<<< HEAD
 from myapp.forms import priceForm,orderForm,MyRegistrationForm,foodForm,restaurantForm,areaForm,branchForm,menuForm,employeeForm
+=======
+from myapp.forms import priceForm,orderForm,MyRegistrationForm,foodForm,restaurantForm,areaForm,branchForm,menuForm,employeeForm,update_branch,update_menu,update_employee,foodForm1
+>>>>>>> dipto
 from django.http import Http404
 from django.core.context_processors import csrf
 from math import *
@@ -135,7 +139,6 @@ def all_restaurants(request,pagination=1):
 		
 	return render_to_response('all_restaurants.html',RequestContext(request,{'restaurants':restaurant_list,
 		'pagination_num':pagination_num,'pagination':pagination,'pagination_list':pagination_list,}))
-
 def show_restaurants(request,area,form_error=0,pagination=1): 
 	registration_form=MyRegistrationForm()
 	if request.method=='POST':
@@ -907,7 +910,10 @@ def show_orders(request,pagination=1):
 	return render(request,"show_orders.html",RequestContext(request,{'order_list':order_list,
 		'pagination_num':pagination_num,'pagination':pagination,'pagination_list':pagination_list,}))
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> dipto
 def admin_site(request):
 	food_name=""
 	category_name=""
@@ -1104,10 +1110,36 @@ def delete_item(request,table_name,pagination=1):
 	if table_name.upper()=="AREA":
 		columns.append("Area id")
 		columns.append("Area name")
+<<<<<<< HEAD
 
 	else:
 		c.execute("select COLUMN_NAME from ALL_TAB_COLUMNS where TABLE_NAME=%s",(table_name.upper(),))
 		columns=c.fetchall()
+=======
+	elif table_name.upper()=="BRANCH":
+		columns.append("Branch id")
+		columns.append("Area name")
+		columns.append("Restaurant Name")
+		columns.append("Address")
+		columns.append("Delivery Charge")
+	elif table_name.upper()=="MENU":
+		columns.append("Menu id")
+		columns.append("Food name")
+		columns.append("Restaurant Name,Area")
+		columns.append("Price")
+		columns.append("Amount")
+	elif table_name.upper()=="EMPLOYEE":
+		columns.append("Employee id")
+		columns.append("Area name")
+		columns.append("Employee Name")
+		columns.append("Phone")
+		columns.append("Hire Date")
+		columns.append("Salary")
+	else:
+		c.execute("select COLUMN_NAME from ALL_TAB_COLUMNS where TABLE_NAME=%s",(table_name.upper(),))
+		columns=c.fetchall()
+	
+>>>>>>> dipto
 	print(columns)
 	n=len(columns)
 	column_num=[]
@@ -1115,6 +1147,7 @@ def delete_item(request,table_name,pagination=1):
 		column_num.append(pp)
 
 	column_list=[]
+<<<<<<< HEAD
 	if table_name.upper() != "AREA":
 		for col in columns:
 
@@ -1122,6 +1155,15 @@ def delete_item(request,table_name,pagination=1):
 		column_list.reverse()
 	else:
 		column_list=columns
+=======
+	if table_name.upper() == "AREA" or  table_name.upper() == "BRANCH" or table_name.upper() == "MENU" or table_name.upper() == "EMPLOYEE" :
+		column_list=columns
+
+	else:
+		for col in columns:
+			column_list.append(col[0])
+		column_list.reverse()
+>>>>>>> dipto
 	
 	items=[]
 	print(table_name.upper())
@@ -1132,9 +1174,20 @@ def delete_item(request,table_name,pagination=1):
 	elif table_name.upper()=="FOOD":
 		c.execute("select * from FOOD order by food_name")
 	elif table_name.upper()=="BRANCH":
+<<<<<<< HEAD
 		c.execute("select * from BRANCH")
 	elif table_name.upper()=="MENU":
 		c.execute("select * from MENU")
+=======
+		c.execute("select branch_id,(select area_name from area where area_id=b.area_id), \
+			(select restaurant_name from restaurant where restaurant_id=b.restaurant_id),address,dcharge\
+			from BRANCH b order by branch_id")
+	elif table_name.upper()=="MENU":
+		c.execute("select menu_id,(select food_name from food where food_id=m.food_id),\
+		 (select (select restaurant_name from restaurant where restaurant_id=b.restaurant_id)||','||\
+		(select area_name from area where area_id=b.area_id) from branch b where b.branch_id=m.branch_id),price,amount\
+		from MENU m")
+>>>>>>> dipto
 	elif table_name.upper()=="EMPLOYEE":
 		c.execute("select * from EMPLOYEE")	
 	
@@ -1258,3 +1311,227 @@ def all_orders(request,pagination=1):
 	return render(request,"admin_show_orders.html",RequestContext(request,{'pagination_num':pagination_num,
 					'pagination':pagination,'pagination_list':pagination_list,'order_list':order_list,}))
 
+<<<<<<< HEAD
+=======
+def update_item(request,table_name):
+	c=connection.cursor()	
+	updated=""
+	error=""
+	if request.method=='POST':
+		table_name=table_name.upper()
+		if table_name=="MENU":
+			form=update_menu(request.POST)
+			if form.is_valid():
+				updated="updated"
+				menu_id=form.cleaned_data['menu_id']
+				food_id=form.cleaned_data['food'] 
+				branch_id=form.cleaned_data['branch_id']
+				price=form.cleaned_data['price']
+				amount=form.cleaned_data['amount']
+				if price==None:
+					c.execute("select price from menu where menu_id=%s",(menu_id,))
+					price=c.fetchone()[0]
+				if amount==None:
+					c.execute("select amount from menu where menu_id=%s",(menu_id,))
+					amount=c.fetchone()[0]
+				c.execute("update menu set food_id=%s,branch_id=%s,price=%s,amount=%s where menu_id=%s",(food_id,branch_id,price,amount,menu_id,))
+		elif table_name=="AREA":
+			form=areaForm(request.POST)
+			if form.is_valid():
+				updated="updated"
+				area_id=form.cleaned_data['area_id']
+				area_name=form.cleaned_data['area']
+				
+				c.execute("select area_name from area")
+				t=c.fetchall()
+				found=0
+				for i in t:
+					if area_name.lower()==i[0].lower():
+						found=1
+						break
+				if found==0:
+					c.execute("update area set area_name=%s where area_id=%s",(area_name,area_id,))
+				else:
+					error="error"
+		elif table_name=="RESTAURANT":
+			form=restaurantForm(request.POST)
+			if form.is_valid():
+				updated="updated"
+				area_id=form.cleaned_data['restaurant_id']
+				area_name=form.cleaned_data['restaurant']
+				
+				c.execute("select restaurant_name from restaurant")
+				t=c.fetchall()
+				found=0
+				for i in t:
+
+					if area_name.lower()==i[0].lower():
+						found=1
+						break
+				if found==0:
+					c.execute("update Restaurant set restaurant_name=%s where restaurant_id=%s",(area_name,area_id,))
+				else:
+					error="error"
+		elif table_name=="EMPLOYEE":
+			form=update_employee(request.POST)
+			if form.is_valid():
+				updated="updated"
+
+				emp_id=form.cleaned_data['emp_id']
+				area_id=form.cleaned_data['area_id']
+				name=form.cleaned_data['name']
+				phone=form.cleaned_data['phone']
+				hire_date=form.cleaned_data['hire_date']
+				salary=form.cleaned_data['salary']
+
+				if len(name)==0:
+					c.execute("select emp_name from employee where emp_id=%s",(emp_id,))
+					name=c.fetchone()[0]
+				if len(phone)==0:
+					c.execute("select phone from employee where emp_id=%s",(emp_id,))
+					phone=c.fetchone()[0]
+				if hire_date==None:
+					c.execute("select hire_date from employee where emp_id=%s",(emp_id,))
+					hire_date=c.fetchone()[0]
+				if salary==None:
+					c.execute("select salary from employee where emp_id=%s",(emp_id,))
+					salary=c.fetchone()[0]
+				c.execute("update employee set area_id=%s,emp_name=%s,phone=%s,hire_date=%s,salary=%s where emp_id=%s",(area_id,name,phone,hire_date,salary,emp_id))
+		elif table_name=="FOOD":
+			form=foodForm1(request.POST)
+			if form.is_valid():
+				updated="updated"
+				area_id=form.cleaned_data['food_id']
+				area_name=form.cleaned_data['food']
+				category=form.cleaned_data['category']
+		
+				found=0
+
+				if len(area_name)==0:
+					c.execute("select food_name from food where food_id=%s",(area_id,))
+					area_name=c.fetchone()[0]
+				else:
+					c.execute("select food_name,food_id from food")
+					t=c.fetchall()
+					for i in t:
+						if area_name.lower()==i[0].lower():
+							found=1
+							break	
+				if len(category)==0:
+					c.execute("select category from food where food_id=%s",(area_id,))
+					category=c.fetchone()[0]
+				if found==0:
+					c.execute("update food set food_name=%s,category=%s where food_id=%s",(area_name,category,area_id,))
+				else:
+					error="error"
+		elif table_name=="BRANCH":
+			form=update_branch(request.POST)
+			if form.is_valid():
+				updated="updated"
+
+				branch_id=form.cleaned_data['branch_id']
+				area_id=form.cleaned_data['area_id']
+				restaurant_id=form.cleaned_data['restaurant_id']
+				address=form.cleaned_data['address']
+				dcharge=form.cleaned_data['dcharge']
+
+				if len(address)==0:
+					c.execute("select address from branch where branch_id=%s",(branch_id,))
+					address=c.fetchone()[0]
+				if dcharge==None:
+					c.execute("select dcharge from branch where branch_id=%s",(branch_id,))
+					dcharge=c.fetchone()[0]
+				c.execute("update branch set area_id=%s,restaurant_id=%s,address=%s,dcharge=%s where branch_id=%s",(area_id,restaurant_id,address,dcharge,branch_id))
+
+	columns=[]
+	if table_name.upper()=="AREA":
+		columns.append("Area id")
+		columns.append("Area name")
+	elif table_name.upper()=="BRANCH":
+		columns.append("Branch id")
+		columns.append("Area name")
+		columns.append("Restaurant Name")
+		columns.append("Address")
+		columns.append("Delivery Charge")
+	elif table_name.upper()=="MENU":
+		columns.append("Menu id")
+		columns.append("Food name")
+		columns.append("Restaurant Name,Area")
+		columns.append("Price")
+		columns.append("Amount")
+	elif table_name.upper()=="EMPLOYEE":
+		columns.append("Employee id")
+		columns.append("Area name")
+		columns.append("Employee Name")
+		columns.append("Phone")
+		columns.append("Hire Date")
+		columns.append("Salary")
+	else:
+		c.execute("select COLUMN_NAME from ALL_TAB_COLUMNS where TABLE_NAME=%s",(table_name.upper(),))
+		columns=c.fetchall()
+
+	#print(columns)
+	n=len(columns)
+	column_num=[]
+	for pp in range(0,n):
+		column_num.append(pp)
+
+	column_list=[]
+	if table_name.upper() == "AREA" or  table_name.upper() == "BRANCH" or table_name.upper() == "MENU" or table_name.upper() == "EMPLOYEE" :
+		column_list=columns
+	else:
+		for col in columns:
+			column_list.append(col[0])
+		column_list.reverse()
+	items=[]
+	#print(table_name.upper())
+	if table_name.upper()=="AREA":
+		c.execute("select area_id,area_name from AREA order by area_id")
+	elif table_name.upper()=="RESTAURANT":
+		c.execute("select * from RESTAURANT order by restaurant_id")
+	elif table_name.upper()=="FOOD":
+		c.execute("select * from FOOD order by food_id")
+	elif table_name.upper()=="BRANCH":
+		c.execute("select branch_id,(select area_name from area where area_id=b.area_id), \
+			(select restaurant_name from restaurant where restaurant_id=b.restaurant_id),address,dcharge\
+			from BRANCH b order by branch_id")
+	elif table_name.upper()=="MENU":
+		c.execute("select menu_id,(select food_name from food where food_id=m.food_id),\
+		 (select (select restaurant_name from restaurant where restaurant_id=b.restaurant_id)||','||\
+		(select area_name from area where area_id=b.area_id) from branch b where b.branch_id=m.branch_id),price,amount\
+		from MENU m order by menu_id")
+	elif table_name.upper()=="EMPLOYEE":
+		c.execute("select emp_id,(select area_name from area where area_id=e.area_id),emp_name,phone,hire_date,\
+		salary from EMPLOYEE e order by emp_id")	
+
+	t=c.fetchall()
+	for ii in t:
+			items.append([])
+	i=0
+	print(t)
+	for jj in t:
+		for kk in range (0,n):
+			items[i].append(jj[kk])
+		i+=1
+
+	table_name=table_name.upper()
+	if table_name=="FOOD":
+		form=foodForm1()
+	
+	elif table_name=="AREA":
+		form=areaForm()
+	elif table_name=="RESTAURANT":
+		form=restaurantForm()
+	elif table_name=="BRANCH":
+		form=update_branch()
+	elif table_name=="MENU":
+		form=update_menu()
+	elif table_name=="EMPLOYEE":
+		form=update_employee()
+	#print(form)
+	return render(request,"update_item.html",RequestContext(request,{'error':error,'success':updated,'table_name':table_name,'column_list':column_list,'items':items,'form':form}))
+
+
+
+
+>>>>>>> dipto

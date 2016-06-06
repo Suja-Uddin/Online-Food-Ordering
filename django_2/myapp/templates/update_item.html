@@ -1,11 +1,9 @@
 {% load staticfiles %}
-
 <html>
-
 <head>
 	<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
 	<link rel="stylesheet" href="{% static "style.css" %}">
-  {% load staticfiles %} {% load bootstrap3 %}
+		  {% load staticfiles %} {% load bootstrap3 %}
  
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -19,7 +17,6 @@
   <script src="{% static "jquery-ui.js" %}"></script>
   <script src="{% static "jquery-1.10.2.js" %}"></script>
 
-	
 </head>
 <body>
 
@@ -31,7 +28,6 @@
 		<div class="right">
 			<p>Welcome <strong><font color='white'>Administrator</font></strong></a></p>
 			<p><a href=""><strong>Log Out</strong></a></p>
-		
 		</div>
 	</div>
 	
@@ -41,76 +37,62 @@
 		    <li><a href="/myapp/admin/insert_restaurant"><span>Insert Restaurant</span></a></li>
 		    <li><a href="/myapp/admin/insert_restaurant"><span>Insert Food</span></a></li>
 		    <li><a href="/myapp/admin/insert_branch"><span>Insert Branch</span></a></li>
-		    <li><a href=""class="active"><span>Show Tables</span></a></li>
+		    <li><a href="/myapp/admin/all_tables" class="active"><span>Show Tables</span></a></li>
 		    <li><a href="/myapp/admin/insert_menu"><span>Insert Menu</span></a></li>
 		    <li><a href="/myapp/admin/insert_employee"><span>Insert Employee</span></a></li>
-		    <li><a href="{%url 'myapp:all_orders'%}"><span>See All Orders</span></a></li>
+
 
 		</ul>
 	</div>
 	<div class="message thank-message">
-		<p><strong>All Tables</strong></p>
+		<p><strong>Table : {{table_name}}</strong></p>
 	</div>
-	<!-- <div >
-		<br><br>
-		<form method="post" action="{%url 'myapp:all_tables'%}">
-			{% csrf_token %}
-		<table align='center'>
+	{%if error%}
+	<div class="message thank-message">
+		<p><strong>Error!</strong></p>
+	</div>
+	{%elif success%}
+	<div class="message thank-message">
+		<p><strong>Updated SuccessFully!</strong></p>
+	</div>
+	{%endif%}
+	<div class='row'>
+		
+		<div class='col-md-8'>
+		<table  class='table table-hover' style="margin: 0px auto;" border="1">
 		<tr>
-            <th>Table Name</th>
+		{% for col in column_list %}
+            
+          <th>{{col}}</th>
+            
+        {% endfor %}
         </tr>
-        {% for field in tables %}
+        {% for field in items %}
           <tr> 
-            <td>
-              {{ field }}
-            </td>
+            
+          {% for i in field %}
+
+          <td>{{i}}</td>
+          {% endfor %}
+           
           </tr>
         {% endfor %}
       	</table>
-		<br><br>
-		
-		
-		</form>
-		<br><br><br><br><br><br>
-	</div> -->
-	<div>
-      <form action="{%url 'myapp:all_tables' %}" method="POST"> 
-        {% csrf_token %}
-         
-        <table class='table table-hover' style="margin: 0px auto;" >
-          <tr>
-            <th>Table Name</th>
-            <th>Select mode</th>
-           
-          </tr>
-          
-          {%for table in tables%}
-          
-          <tr>
-          <td>{{table}}</td>
-          <td >
-          	
-<<<<<<< HEAD
-			    <a href="/myapp/admin/insert_area">Update</span></a>
-=======
-			    <a href="/myapp/admin/update_item/{{table}}">Update</span></a>
->>>>>>> dipto
-			    <a href="/myapp/admin/delete_item/{{table}}"><span>Delete</span></a>
-		
-          </td>
-	          
-			
-          </tr>
-          {%endfor%}
-        </table>
-        <br><br>
-       	
-        <!-- <input type="submit" value="Insert"
-style="background-color:green;margin-left:auto;margin-right:auto;display:block"></input>
-		 --> 
-        </form>
-    </div>
+      </div>
+        <form method="POST" action="{%url 'myapp:update_item' table_name %}">
+        	{% csrf_token %}
+		<div class='col-md-4'>
+	        {% for field in form %}
+	               {% bootstrap_field field %}
+	           
+	            <!-- <td>{{ field.errors }}</td> -->
+	        {% endfor %}
+    		<input class='btn btn-success' type="submit" align="center"  value="UPDATE" />
+    	</form>
+      </div>
+	</div>
 	
+      
 	
 </div>
 
@@ -119,4 +101,12 @@ style="background-color:green;margin-left:auto;margin-right:auto;display:block">
 </div>
 
 </body>
+<script>
+  $(document).ready(function() {
+  		$('.radio_button').click(function() {
+  			console.log($("input[name='checks[]']:checked").val());
+  			{%for field in }
+  		});
+  	});
+ </script>
 </html>

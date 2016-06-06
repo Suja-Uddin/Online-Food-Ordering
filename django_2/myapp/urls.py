@@ -6,7 +6,10 @@ urlpatterns = patterns('',
 	#url(r'^(?P<emp_id>\d+)/(?P<dept_name>\w+)/(?P<dept_id>\d+)/$' , newdept), 
 	url(r'^$',views.index,name='index'),
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> dipto
 	url(r'^admin/$',views.admin_site,name='admin'),
 
 	url(r'^admin/insert_restaurant/$',views.insert_restaurant,name='insert_restaurant'),
@@ -27,6 +30,11 @@ urlpatterns = patterns('',
 
 	url(r'admin/See All Order/$',views.all_orders,name='all_orders'),
 
+<<<<<<< HEAD
+=======
+	url(r'^admin/update_item/(?P<table_name>([\w]+[ ]*[\w]*))$',views.update_item,name='update_item'),
+
+>>>>>>> dipto
 	url(r'^search all foods/$',views.search_food,name='search_food'),
 
 		#show all foods in price range
