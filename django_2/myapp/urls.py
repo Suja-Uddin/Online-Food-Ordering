@@ -6,6 +6,28 @@ urlpatterns = patterns('',
 	#url(r'^(?P<emp_id>\d+)/(?P<dept_name>\w+)/(?P<dept_id>\d+)/$' , newdept), 
 	url(r'^$',views.index,name='index'),
 
+	url(r'^admin/$',views.admin_site,name='admin'),
+
+	url(r'^admin/insert_restaurant/$',views.insert_restaurant,name='insert_restaurant'),
+
+	url(r'^admin/insert_area/$',views.insert_area,name='insert_area'),
+
+	url(r'^admin/insert_branch/$',views.insert_branch,name='insert_branch'),
+
+	url(r'^admin/insert_menu/$',views.insert_menu,name='insert_menu'),
+
+	url(r'^admin/insert_employee/$',views.insert_employee,name='insert_employee'),
+
+	url(r'^admin/all_tables/$',views.show_tables,name='all_tables'),
+
+	url(r'^admin/delete_item/(?P<table_name>([\w]+[ ]*[\w]*))$',views.delete_item,name='delete_item'),
+
+	url(r'^admin/delete_item/(?P<table_name>([\w]+[ ]*[\w]*))/page/(?P<pagination>[\d]+)/$',views.delete_item,name='delete_item_pagination'),
+
+	url(r'admin/See All Order/$',views.all_orders,name='all_orders'),
+
+	url(r'^admin/update_item/(?P<table_name>([\w]+[ ]*[\w]*))$',views.update_item,name='update_item'),
+
 	url(r'^search all foods/$',views.search_food,name='search_food'),
 
 		#show all foods in price range
