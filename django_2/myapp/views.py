@@ -9,7 +9,7 @@ from collections import namedtuple
 from django.shortcuts import render_to_response 
 from django.template import RequestContext
 from django.contrib import auth
-from myapp.forms import priceForm,orderForm,MyRegistrationForm,foodForm,restaurantForm,areaForm,branchForm,menuForm,employeeForm,update_branch,update_menu,update_employee,foodForm1
+from myapp.forms import priceForm,orderForm,MyRegistrationForm,foodForm,restaurantForm,areaForm,branchForm,menuForm,employeeForm,update_branch,update_menu,update_employee,foodForm1,areaForm1
 from django.http import Http404
 from django.core.context_processors import csrf
 from math import *
@@ -1303,19 +1303,23 @@ def update_item(request,table_name):
 					amount=c.fetchone()[0]
 				c.execute("update menu set food_id=%s,branch_id=%s,price=%s,amount=%s where menu_id=%s",(food_id,branch_id,price,amount,menu_id,))
 		elif table_name=="AREA":
-			form=areaForm(request.POST)
+			form=areaForm1(request.POST)
 			if form.is_valid():
 				updated="updated"
 				area_id=form.cleaned_data['area_id']
 				area_name=form.cleaned_data['area']
-				
-				c.execute("select area_name from area")
-				t=c.fetchall()
 				found=0
-				for i in t:
-					if area_name.lower()==i[0].lower():
-						found=1
-						break
+				if len(area_name)==0:
+					c.execute("select area_name from area where area_id=%s",(area_id,))
+					area_name=c.fetchone()[0]
+				else:
+					c.execute("select area_name from area")
+					t=c.fetchall()
+					
+					for i in t:
+						if area_name.lower()==i[0].lower() :
+							found=1
+							break
 				if found==0:
 					c.execute("update area set area_name=%s where area_id=%s",(area_name,area_id,))
 				else:
@@ -1486,7 +1490,7 @@ def update_item(request,table_name):
 		form=foodForm1()
 	
 	elif table_name=="AREA":
-		form=areaForm()
+		form=areaForm1()
 	elif table_name=="RESTAURANT":
 		form=restaurantForm()
 	elif table_name=="BRANCH":

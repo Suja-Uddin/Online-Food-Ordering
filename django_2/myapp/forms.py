@@ -117,7 +117,17 @@ class areaForm(forms.Form):
 
 	area_id=forms.ChoiceField(label="Area ID",choices=area_list)
 	area = forms.CharField(label='Area Name')
-	
+class areaForm1(forms.Form):
+	qq="select area_id from area order by  area_id"
+	c=connection.cursor()
+	c.execute(qq)
+	t=c.fetchall()
+	area_list=[]
+	for ii in t:
+		area_list.append((ii[0],ii[0]))
+
+	area_id=forms.ChoiceField(label="Area ID",choices=area_list)
+	area = forms.CharField(label='Area Name',required=False)
 class branchForm(forms.Form):
 	qq="select initcap(area_name),area_id from Area order by initcap(area_name)"
 	c=connection.cursor()
