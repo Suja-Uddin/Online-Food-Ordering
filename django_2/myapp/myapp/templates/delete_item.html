@@ -1,0 +1,87 @@
+{% load staticfiles %}
+<html>
+<head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+	<link rel="stylesheet" href="{% static "style.css" %}">
+</head>
+<body>
+
+<div id="shell">
+	
+	
+	<div id="header">
+		<h1><a href="#">Admin Site</a></h1>
+		<div class="right">
+			<p>Welcome <strong><font color='white'>Administrator</font></strong></a></p>
+			<p><a href=""><strong>Log Out</strong></a></p>
+		</div>
+	</div>
+	
+	<div id="navigation">
+		<ul> 
+		    <li><a href="/myapp/admin/insert_area"><span>Insert Area</span></a></li>
+		    <li><a href="/myapp/admin/insert_restaurant"><span>Insert Restaurant</span></a></li>
+		    <li><a href="/myapp/admin/insert_restaurant"><span>Insert Food</span></a></li>
+		    <li><a href="/myapp/admin/insert_branch"><span>Insert Branch</span></a></li>
+		    <li><a href="/myapp/admin/all_tables"class="active"><span>Show Tables</span></a></li>
+		    <li><a href="/myapp/admin/insert_menu"><span>Insert Menu</span></a></li>
+		    <li><a href="/myapp/admin/insert_employee"><span>Insert Employee</span></a></li>
+
+
+		</ul>
+	</div>
+	<div class="message thank-message">
+		<p><strong>Table : {{table_name}}</strong></p>
+	</div>
+	{%if success%}
+	<div class="message thank-message">
+		<p><strong>Deleted SuccessFully!</strong></p>
+	</div>
+	{%endif%}
+	{%if error%}
+	<div class="message thank-message">
+		<p><strong>Error!</strong></p>
+	</div>
+	{%endif%}
+	<div >
+		<br><br>
+		<form action="{%url 'myapp:delete_item' table_name %}" method="POST"> 
+        {% csrf_token %}
+		<table style="margin: 0px auto;" border="1">
+		<tr>
+		{% for col in column_list %}
+            
+          <th>{{col}}</th>
+            
+        {% endfor %}
+        <th>checkbox</th>
+        </tr>
+        {% for field in items %}
+          <tr> 
+            
+          {% for i in field %}
+
+          <td>{{i}}</td>
+          {% endfor %}
+           
+          <td><input type="checkbox" name="checks[]" value="{{field.0}}" />
+          </tr>
+        {% endfor %}
+      	</table>
+		<br><br>
+		<br><br>
+	</div>
+	<div style="float:center;text-align:center;">
+	<input type="submit" align="center"  value="DELETE" />
+	</form>
+	</div>
+      
+	
+</div>
+
+<div id="footer">
+	<p>&copy; designed by suja and dipto.</a></p>
+</div>
+
+</body>
+</html>

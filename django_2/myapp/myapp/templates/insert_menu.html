@@ -1,0 +1,77 @@
+{% load staticfiles %}
+<html>
+<head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+	<link rel="stylesheet" href="{% static "style.css" %}">
+</head>
+<body>
+
+<div id="shell">
+	
+	
+	<div id="header">
+		<h1><a href="#">Admin Site</a></h1>
+		<div class="right">
+			<p>Welcome <strong><font color='white'>Administrator</font></strong></a></p>
+			<p><a href=""><strong>Log Out</strong></a></p>
+			
+		</div>
+	</div>
+	
+	<div id="navigation">
+		<ul> 
+		    <li><a href="/myapp/admin/insert_area"><span>Insert Area</span></a></li>
+		    <li><a href="/myapp/admin/insert_restaurant"><span>Insert Restaurant</span></a></li>
+		    <li><a href="/myapp/admin"><span>Insert Food</span></a></li>
+		    <li><a href="/myapp/admin/insert_branch"><span>Insert Branch</span></a></li>
+		    <li><a href="/myapp/admin/all_tables"><span>Show Tables</span></a></li>
+		    <li><a href="" class="active"><span>Insert Menu</span></a></li>
+		    <li><a href="/myapp/admin/insert_employee"><span>Insert Employee</span></a></li>
+
+
+		</ul>
+	</div>
+	<div class="message thank-message">
+		<p><strong>Add Menu Information</strong></p>
+	</div>
+	{%if success%}
+	<div class="message thank-message">
+		<p><strong>Inserted SuccessFully!</strong></p>
+	</div>
+	{%endif%}
+	{%if error%}
+	<div class="message thank-message">
+		<p><strong>Error!</strong></p>
+	</div>
+	{%endif%}
+	<div >
+		<br><br>
+		<form method="post" action="{%url 'myapp:insert_menu'%}">
+			{% csrf_token %}
+		<table>
+        {% for field in form %}
+          <tr>
+            <th align='left'><br>{{field.label_tag}}<br><br></th> 
+            <td>
+              {{ field }}
+            </td>
+            <td>{{ field.errors }}</td>
+          </tr>
+        {% endfor %}
+      	</table>
+		<br><br>
+		<input type="submit" value="Add Menu">
+		
+		</form>
+		<br><br><br><br><br><br>
+	</div>
+	
+	
+</div>
+
+<div id="footer">
+	<p>&copy; designed by suja and dipto.</a></p>
+</div>
+
+</body>
+</html>

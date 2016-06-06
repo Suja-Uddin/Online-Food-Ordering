@@ -1,0 +1,210 @@
+<html>
+<head>   {% load staticfiles %} {% load bootstrap3 %}
+ 
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{% static "bootstrap.min.css" %}">
+  <script src="{% static "jquery.min.js" %}"></script>
+  <script src="{% static "bootstrap.min.js" %}"></script>
+
+  <meta charset="utf-8">
+
+   <link rel="stylesheet" href="{% static "jquery-ui.css" %}">
+  <script src="{% static "jquery-ui.js" %}"></script>
+  <script src="{% static "jquery-1.10.2.js" %}"></script>
+
+</head>
+<style type="text/css">a {text-decoration: none}</style>
+</head>      
+<div>
+        {% if category_name %}
+        <div class=" alert alert-info" style="text-align:center;font-size:1.5em;"> 
+        Food Category <strong> {{category_name}}</strong>
+        </div>
+        
+        {%else%}
+        <div class=" alert alert-info" style="text-align:center;font-size:1.5em;"> 
+        Foods with price between <strong>{{price1}}</strong> and 
+        <strong>  {{price2}}</strong>
+        </div>
+        {%endif%} 
+
+</div >
+<div id="login_error" style="display:none;">
+
+    <div class="alert alert-danger" style="text-align:center;font-size:1em;"> 
+        <button type="button" class="close alert-close">&times;</button>
+            Please login First!
+    </div>
+</div>
+
+<div class='container'>
+    <div class='well'>
+    <div class='row'>
+      
+    {%for food in foods%}   
+        {%if food %}
+        <div class='col-md-4'>
+        <div class="well" id="menu{{forloop.counter}}">
+                <p align='center' > <strong> {{food.1}} </strong>  </p>
+                Price:<strong> {{food.2}}</strong><br>
+                Rating:<div id="rating{{forloop.counter}}"> <strong> {{food.3}}</strong></div> <br>
+                Restaurant Name:<a href="{%url 'myapp:menu_list' food.0 %}" > <strong> {{food.4}}</strong><br></a>
+                Address:<strong>{{food.5}}</strong><br>
+                <meta name="menu_id{{forloop.counter}}" content="{{food.6}}" />
+                <meta name="branch_id{{forloop.counter}}" content="{{food.0}}" />
+                <meta name="amount{{forloop.counter}}" content="{{food.7}}" />
+                <br>
+                Give rating:
+                <select align='left' class="dropdown" id="dropdown{{forloop.counter}}">
+                    <option value='1'>1</option>
+                    <option value='2'>2</option>
+                    <option value='3'>3</option>
+                    <option value='4'>4</option>
+                    <option value='5'>5</option>
+                    <option value='6'>6</option>
+                    <option value='7'>7</option>
+                    <option value='8'>8</option>
+                    <option value='9'>9</option>
+                    <option value='10'>10</option>
+                </select> 
+                <button class="btn btn-success btn-xs" type="submit" id="{{forloop.counter}}">submit</button> </p>
+            Enter amount(Between 1 and {{food.7}}) <br>
+            <input class='form-control' size="10" type="number" id="amount{{forloop.counter}}" >
+            <p align='center'> <button type="submit" class="btn btn-success" id="order{{forloop.counter}}" value="{{forloop.counter}}">Add to Cart</button> </p>
+
+        </div>
+        </div>
+        {%endif%}
+    {%endfor%}
+     </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function()
+    {
+
+        $(document).on('click', '.alert-close', function() {
+            document.getElementById("login_error").style.display='none';
+           });
+        $('.btn-success').click(function(event){
+            if (this.id[0]=='o')
+            {
+                //alert("order!");
+                var id=this.id;
+                 $.ajax({
+                type:"GET",
+                url:"{%url 'myapp:login_varify' %}",
+
+                success : function(json) {
+                    
+                    var counter=document.getElementById(id).value;
+                    var amount=document.getElementById("amount"+counter).value;
+                    if (json.login=='success')
+                    {
+
+                        var amount1="meta[name='amount"+counter+"']";
+                        amount1=$(amount1).attr('content');
+                        console.log(amount);
+                        console.log(amount1);
+                        console.log(amount1-amount);
+                        if ( amount1-amount<0 || amount<1)
+                        {
+                            alert("Enter valid amount");
+
+                        }
+                        else
+                        {
+                            //console.log(counter);
+                            var menu_id="meta[name='menu_id"+counter+"']";
+                            var food_id=$(menu_id).attr('content');
+
+                            
+                                    //console.log(e);
+                            $.ajax({
+                            type: "POST",
+                            url: "{% url 'myapp:add_order' %}",
+
+                            data: {
+                                csrfmiddlewaretoken: '{{ csrf_token }}',
+                                amount:amount,
+                                menu_id:$(menu_id).attr('content')
+                            },
+                            success : function(json) {
+                                    alert("Successfully added to your order.You can submit your order or add more foods to your order.");   
+                                
+                            },
+                            error: function(data) {
+                                alert("Error in ordering food!Please reload the page and try again")
+                            }
+                            });
+
+                        
+                            //console.log(food_id);
+                            //window.location.href = "order/"+food_id;
+                        }
+                    }
+                    else
+                    {
+                        $('#login_error').css("display","inline");
+                    }
+
+                },
+                });
+            }
+            else
+            {
+                var id=this.id;
+                var dropdown_id='#dropdown'+this.id;
+                var menu_id="meta[name='menu_id"+this.id+"']";
+                var e = $(dropdown_id).val();
+                $.ajax({
+                type:"GET",
+                url:"{%url 'myapp:login_varify' %}",
+
+                success : function(json) {
+                    if (json.login=='success')
+                    {
+                        //console.log(e);
+                        $.ajax({
+                        type: "POST",
+                        url: "{% url 'myapp:submit_rating' %}",
+                        data: {
+                            csrfmiddlewaretoken: '{{ csrf_token }}',
+                            value:e,
+                            menu_id:$(menu_id).attr('content')
+                        },
+                        success : function(json) {
+                            alert("Rating Submitted Successfully!");
+                            var rating=json.rating;
+                            console.log(rating);
+                            var rating_div="#rating"+id;
+                            console.log(rating_div);
+                            $(rating_div).html("<strong>"+rating+"</strong>");
+
+                        },
+                        error: function(data) {
+                            alert("Error submitting rating!");
+                        }
+                        });
+
+                    }
+                    else 
+                    {
+                        document.getElementById("login_error").style.display='inline';
+                    }
+                    console.log(json.login);
+                    
+                    //$("#entire_page").dialog();
+                    //console.log("success");
+                },
+                error: function(data) {
+                    //alert("Please Login First")
+                }
+                });
+            }
+        });
+        
+    });
+</script>
+</html>
