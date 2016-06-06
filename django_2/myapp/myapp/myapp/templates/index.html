@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+
+<head>   {% load staticfiles %} {% load bootstrap3 %}
+ 
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{% static "bootstrap.min.css" %}">
+  <script src="{% static "jquery.min.js" %}"></script>
+  <script src="{% static "bootstrap.min.js" %}"></script>
+
+  <meta charset="utf-8">
+
+   <link rel="stylesheet" href="{% static "jquery-ui.css" %}">
+  <script src="{% static "jquery-ui.js" %}"></script>
+  <script src="{% static "jquery-1.10.2.js" %}"></script>
+
+</head>
+<style> 
+#header{
+
+    background-color:DarkSlateGray;
+    color:white;
+    text-align: center;
+    clear:both;
+
+     width:100%;
+     height:100;
+    }
+.navbar-custom {
+    color: red;
+    background-color: Peru;
+    text-shadow:none;
+    font-size: 1.5em;
+}
+</style>
+
+<body>
+<nav class="navbar navbar-inverse navbar-fixed-top" >
+  
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>                        
+      </button>
+      <strong><a class="navbar-brand" href="#"><font color='lime'>Online Food Ordering</font></a></strong>
+    </div>
+    <div class="collapse navbar-collapse" id="myNavbar">
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="#">Home</a></li>
+        <li><a href="{%url 'myapp:all_restaurants'%}">All Restaurants</a></li>
+        {%if user.is_authenticated%}
+        <li><a href="{%url 'myapp:order' %}">Submit Your order</a></li>
+        {%endif%}
+      </ul>
+
+      <ul class="nav navbar-nav navbar-right">
+        {% if user.is_authenticated %}
+        <li><a ><font color='lime'>[{{user.username}}]</font></a></li>
+        <li><a href="{%url 'logout'%}"><span class="glyphicon glyphicon-user"></span> <font color='red'>Logout</font></a></li>
+        {%else%}
+        <li><a id="login" href="#popUpWindow1" data-toggle="modal"><span class="glyphicon glyphicon-user"></span> Login</a></li>
+        <li><a id="register" href="#popUpWindow2" data-toggle="modal"><span class="glyphicon glyphicon-user"></span> Register</a></li>
+        {%endif%}
+      </ul>
+    </div>
+    </div>
+</nav>
+
+<div class="modal fade" id="popUpWindow1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <!-- header -->
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h3 class="modal-title">Log In</h3>
+                </div>
+
+                <!-- body (form) -->
+                <div class="modal-body">
+                    
+                        <div class="form-group">
+                            <input id="username" name="username" type="text" class="form-control" placeholder="Username">
+                        </div>
+                        <div class="form-group">
+                            <input id="password" name="password" type="password" class="form-control" placeholder="Password">
+                        </div>
+                        <div class="alert alert-danger" style="display:none;" id="show_error">
+                        <strong>Invalid Username/Password!</strong> 
+                        </div>
+                    
+                </div>
+
+                <!-- button -->
+                <div class="modal-footer">
+                    <button id="submit_button" class="btn btn-primary btn-block">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>  
+<div class="modal fade" id="popUpWindow2">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <!-- header -->
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h3 class="modal-title">Register</h3>
+                </div>
+                <!-- body (form) -->
+                <div class="modal-body">
+                      <forM action="{%url 'myapp:index'%}" method="POST">
+
+                         {% csrf_token %}
+                           
+                          {% for field in registration_form %}
+                              <div class="form-group">
+  
+                                {% bootstrap_field field %}
+                            
+                                      <!--{% for error  in field.errors %}
+                                      <!-- Output error text message only -->
+
+                                       <!--   {{error}}
+                                      {% endfor %} -->
+                                </div>
+                          {% endfor %}
+                        <button name="registerButton" id="submit_button" class="btn btn-primary btn-block">Submit</button>
+                      </form>
+                </div>
+
+                <!-- button -->
+                <div class="modal-footer">
+                    
+                </div>
+            </div>
+        </div>
+    </div>  
+    <br><br>
+ <div id="header">
+  <br><h1>Order food online with home delivery now!</h1>
+
+  <h2>Home delivery from hundreds of restaurants right to your door</h2>
+	
+    <div class='row'>
+    <div class='col-sm-5'>
+      <div class="alert alert-danger" style="display:none;" id="area_error">
+        No Such Area!Please follow the suggestions while entering area
+        </div>
+      
+      <input  id="textfield" name="area" type="text" placeholder="Enter your location" autocomplete="on" class='form-control' >
+    <br>
+    <button id="area_submit" type="submit" class="btn btn-success">Find Restaurant</button>
+    </div>
+
+    <div class='col-sm-3'>
+    <form action="{%url 'myapp:search_food'%}" method="POST">
+      {%csrf_token%}
+    
+      <input  name="search_food" id="search_food" type="text" placeholder="Enter Food name" autocomplete="on" class='form-control' >
+    <br>
+    <button   type="submit" class="btn btn-success">Searh Food</button>
+    
+    </form>
+    </div>
+
+    <div class='col-sm-4'>
+
+        <form action="{% url 'myapp:index'%}" method="POST">
+          {% csrf_token %}
+           
+          {% for field in form %}
+
+             {% bootstrap_field field show_label=False %}
+              
+                        <!--{% for error  in field.errors %}
+                        <!-- Output error text message only -->
+
+                         <!--   {{error}}
+                        {% endfor %} -->
+
+        {% endfor %}
+
+        <button name="priceSearchButton" type="submit" class="btn btn-success">Show Food</button>
+        </form>
+
+      </div> 
+
+    </div>
+
+  </div>  
+
+<br>
+</div>
+
+
+<div class='container'>
+    <br>
+    <font color='Red' size='5'> Food Category</font><br><br>
+    <div class='well'>
+    <div class='row'>
+      <br>
+    {%for jj in categories%}
+      <div class='col-md-2'>
+        <div class='well'>
+        <a id="category" href="/myapp/food_category/{{jj.0}}" style="text-decoration:none;" > 
+            <strong> {{jj.0}} </strong> </a> 
+        </div>
+      </div>
+    {%endfor%}
+    </div>
+  </div>
+  </div >
+
+<script>
+$(document).ready(function() {
+  jQuery.noConflict(); 
+  
+{% if registration_form.errors %}  
+$("#popUpWindow2").modal("show");
+ {%endif %}
+
+var tags = [];
+{% for ii in area_list%}
+   tags.push("{{ii}}")
+{%endfor%}
+//here goes code for showing suggestion 
+  $( "#textfield" ).autocomplete({
+          source: function( request, response ) {
+                  var matcher = new RegExp( "^" + $.ui.autocomplete.escapeRegex( request.term ), "i" );
+                  response( $.grep( tags, function(item){
+                      return matcher.test( item );
+                  }) );
+              }
+        });
+
+  $("#submit_button").click(function(event){
+ 
+    $.ajax({
+      type:"POST",
+      url:"{%url 'auth' %}",
+
+      data: {
+        csrfmiddlewaretoken: '{{ csrf_token }}',
+        username:document.getElementById('username').value,
+        password:document.getElementById('password').value,
+      },
+      success : function(json) {
+        if (json.login=='success')
+        {
+            window.location.href = '';
+        }
+        else{
+          document.getElementById('show_error').style.display='inline';
+        }
+      },
+    });
+  });
+
+
+    $('#area_submit').click(function(event){
+      var area=$('#textfield').val();
+      console.log(area);
+
+      $.ajax({
+            type:"POST",
+            url:"{%url 'myapp:area_varify' %}",
+
+            data:{
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                area:area,
+            },
+            success : function(json) {
+            if (json.find_area=='success')
+            {
+
+                window.location.href = "/myapp/restaurants/area/"+area;
+            }
+            else 
+            {
+              //alert('No Such Area!Please follow the suggestions while entering area');
+              document.getElementById('area_error').style.display='inline';
+            }
+            console.log(json.find_area);
+              
+              //$("#entire_page").dialog();
+              //console.log("success");
+          },
+        error: function(data) {
+                alert("something happened!");
+            }
+            });
+
+      
+    });
+
+
+      var tags1 = [];
+      {% for ii in food_list%}
+         tags1.push("{{ii}}")
+      {%endfor%}
+
+      $( "#search_food" ).autocomplete({
+        source: function( request, response ) {
+                var matcher = new RegExp( "^" + $.ui.autocomplete.escapeRegex( request.term ), "i" );
+                response( $.grep( tags1, function(item){
+                    return matcher.test( item );
+                }) );
+            }
+      });
+});
+</script>
+ 
+</body>
+</html>
