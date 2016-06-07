@@ -1,3 +1,4 @@
+
 <html>
 <head>   {% load staticfiles %} {% load bootstrap3 %}
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -14,14 +15,119 @@
 </head>
 <style type="text/css">a {text-decoration: none}</style>
 </head>
-		
+
+<nav class="navbar navbar-inverse navbar-fixed-top" >
+  
+ <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>                        
+      </button>
+      <strong><a class="navbar-brand" href="{%url 'myapp:index'%}"><font color='lime'>Online Food Ordering</font></a></strong>
+    </div>
+    <div class="collapse navbar-collapse" id="myNavbar">
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="{%url 'myapp:index'%}">Home</a></li>
+        <li><a href="{%url 'myapp:all_restaurants'%}">All Restaurants</a></li>
+        {%if user.is_authenticated%}
+        <li><a href="{%url 'myapp:order' %}">Submit Your order</a></li>
+        
+        <li><a href="{%url 'myapp:show_orders'%}">Previous Orders</a></li>
+        {%endif%}
+      </ul>
+
+      <ul class="nav navbar-nav navbar-right">
+        {% if user.is_authenticated %}
+        <li><a ><font color='lime'>[{{user.username}}]</font></a></li>
+        <li><a href="{%url 'logout'%}"><span class="glyphicon glyphicon-user"></span> <font color='red'>Logout</font></a></li>
+        {%else%}
+        <li><a id="login" href="#popUpWindow1" data-toggle="modal"><span class="glyphicon glyphicon-user"></span> Login</a></li>
+        <li><a id="register" href="#popUpWindow2" data-toggle="modal"><span class="glyphicon glyphicon-user"></span> Register</a></li>
+        {%endif%}
+      </ul>
+    </div>
+    </div>
+</nav>
+
+<div class="modal fade" id="popUpWindow1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <!-- header -->
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h3 class="modal-title">Log In</h3>
+                </div>
+
+                <!-- body (form) -->
+                <div class="modal-body">
+                    
+                        <div class="form-group">
+                            <input id="username" name="username" type="text" class="form-control" placeholder="Username">
+                        </div>
+                        <div class="form-group">
+                            <input id="password" name="password" type="password" class="form-control" placeholder="Password">
+                        </div>
+                        <div class="alert alert-danger" style="display:none;" id="show_error">
+                        <strong>Invalid Username/Password!</strong> 
+                        </div>
+                    
+                </div>
+
+                <!-- button -->
+                <div class="modal-footer">
+                    <button id="submit_button" class="btn btn-primary btn-block">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>  
+<div class="modal fade" id="popUpWindow2">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <!-- header -->
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h3 class="modal-title">Register</h3>
+                </div>
+                <!-- body (form) -->
+                <div class="modal-body">
+                      <form action="{%url 'myapp:restaurant_list' area_name%}" method="POST">
+
+                         {% csrf_token %}
+                           
+                          {% for field in registration_form %}
+                              <div class="form-group">
+  
+                                {% bootstrap_field field %}
+                            
+                                      <!--{% for error  in field.errors %}
+                                      <!-- Output error text message only -->
+
+                                       <!--   {{error}}
+                                      {% endfor %} -->
+                                </div>
+                          {% endfor %}
+                        <button name="registerButton" id="submit_button" class="btn btn-primary btn-block">Submit</button>
+                      </form>
+                </div>
+
+                <!-- button -->
+                <div class="modal-footer">
+                    
+                </div>
+            </div>
+        </div>
+ </div>  
+ <br><br>
+
 <div>
    {%if area_name%}
-	    
-
-		    <div class=" alert alert-info" style="text-align:center;font-size:1.5em;"> 
-		    	Restaurants in <strong> {{area_name}} </strong>
-		    </div>
+	    <div class=" alert alert-info" style="text-align:center;font-size:1.5em;"> 
+	    	Restaurants in <strong> {{area_name}} </strong>
+	    </div>
 	
    {%endif%}
 </div>
@@ -31,7 +137,7 @@
 			<div class='well'>
 			{%for jj in categories%}
 			 	<div class='well'>
-				<a href="{% url 'myapp:index' %}"> {{jj.0}}
+				<a href="{% url 'myapp:area_food_category' area_name jj.0%}"> {{jj.0}} </a>
 				</div>
 			{% endfor%}
 			</div>
@@ -50,4 +156,72 @@
 		<div class='col-md-3'></div>
 	</div>
 </div>
+
+<script>
+  $(document).ready(function() {
+  jQuery.noConflict(); 
+
+  {%if registration_form.errors%}  
+  $("#popUpWindow2").modal("show");
+  {%endif%}
+
+  $("#submit_button").click(function(event){
+
+    $.ajax({
+      type:"POST",
+      url:"{%url 'auth' %}",
+
+      data: {
+        csrfmiddlewaretoken: '{{ csrf_token }}',
+        username:document.getElementById('username').value,
+        password:document.getElementById('password').value,
+      },
+      success : function(json) {
+        if (json.login=='success')
+        {
+            window.location.href = '';
+        }
+        else{
+          document.getElementById('show_error').style.display='inline';
+        }
+      },
+    });
+  });
+      var tags1 = [];
+      $("#search_food").keyup(function(){
+        var e=this.value;
+        console.log(e);
+        if (e.length==0) tags1=[];
+        if (e.length>=3)
+        {
+          $.ajax({
+            type:"POST",
+            url:"{%url 'myapp:search_food_ajax' %}",
+
+            data: {
+              csrfmiddlewaretoken: '{{ csrf_token }}',
+              food:e,
+            },
+            success : function(json) {
+              var i;
+              console.log(json);
+              console.log(json[0]);
+              tags1=[]
+              for(i=0;i<json.length;i++)
+
+                tags1.push(json[i][0]);
+            },
+          });
+        }
+      });
+      $( "#search_food" ).autocomplete({
+        source: function( request, response ) {
+                var matcher = new RegExp( "^" + $.ui.autocomplete.escapeRegex( request.term ), "i" );
+                response( $.grep( tags1, function(item){
+                    return matcher.test( item );
+                }) );
+            }
+      });
+  });
+</script>
 </html>

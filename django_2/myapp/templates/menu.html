@@ -1,156 +1,474 @@
 <html>
 <html lang="en">
-{% load bootstrap3 %} {% load staticfiles %} 
-<head>  
-
+<head>   {% load staticfiles %} {% load bootstrap3 %}
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="{% static "bootstrap.min.css" %}">
   <script src="{% static "jquery.min.js" %}"></script>
   <script src="{% static "bootstrap.min.js" %}"></script>
-<script src="{% static "jquery.min.js" %}"></script>
+
   <meta charset="utf-8">
-   
-  <link rel="stylesheet" href="{% static "jquery-ui.css" %}">
-  <script src="{% static "jquery-1.10.2.js" %}"></script>
+
+   <link rel="stylesheet" href="{% static "jquery-ui.css" %}">
   <script src="{% static "jquery-ui.js" %}"></script>
+  <script src="{% static "jquery-1.10.2.js" %}"></script>
+
 </head>
+
 <style>
 .jumbotron{
 	font-size: 20px;
 }
 </style>
+<style type="text/css">a {text-decoration: none}</style>
 </head>
-	
-<div id="heading">
-	   {%if food_search%}
-	   <div class="row">
+<nav class="navbar navbar-inverse navbar-fixed-top" >
+  
+ <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>                        
+      </button>
+      <strong><a class="navbar-brand" href="{%url 'myapp:index'%}"><font color='lime'>Online Food Ordering</font></a></strong>
+    </div>
+    <div class="collapse navbar-collapse" id="myNavbar">
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="{%url 'myapp:index'%}">Home</a></li>
+        <li><a href="{%url 'myapp:all_restaurants'%}">All Restaurants</a></li>
+        {%if user.is_authenticated%}
+        <li><a href="{%url 'myapp:order' %}">Submit Your order</a></li>
+        <li><a href="{%url 'myapp:show_orders'%}">Previous Orders</a></li>
+        {%endif%}
+      </ul>
 
+      <ul class="nav navbar-nav navbar-right">
+        {% if user.is_authenticated %}
+        <li><a ><font color='lime'>[{{user.username}}]</font></a></li>
+        <li><a href="{%url 'logout'%}"><span class="glyphicon glyphicon-user"></span> <font color='red'>Logout</font></a></li>
+        {%else%}
+        <li><a id="login" href="#popUpWindow1" data-toggle="modal"><span class="glyphicon glyphicon-user"></span> Login</a></li>
+        <li><a id="register" href="#popUpWindow2" data-toggle="modal"><span class="glyphicon glyphicon-user"></span> Register</a></li>
+        {%endif%}
+      </ul>
+    </div>
+    </div>
+</nav>
+
+<div class="modal fade" id="popUpWindow1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <!-- header -->
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h3 class="modal-title">Log In</h3>
+                </div>
+
+                <!-- body (form) -->
+                <div class="modal-body">
+                    
+                        <div class="form-group">
+                            <input id="username" name="username" type="text" class="form-control" placeholder="Username">
+                        </div>
+                        <div class="form-group">
+                            <input id="password" name="password" type="password" class="form-control" placeholder="Password">
+                        </div>
+                        <div class="alert alert-danger" style="display:none;" id="show_error">
+                        <strong>Invalid Username/Password!</strong> 
+                        </div>
+                    
+                </div>
+
+                <!-- button -->
+                <div class="modal-footer">
+                    <button id="login_submit_button" class="btn btn-primary btn-block">Submit</button>
+                </div>
+            </div>
+        </div>
+  </div>  
+<div class="modal fade" id="popUpWindow2">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <!-- header -->
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h3 class="modal-title">Register</h3>
+                </div>
+                <!-- body (form) -->
+                <div class="modal-body">
+                	   {%if food_search%}
+                      <form action="/myapp/search all foods/{{search_name}}/page/1/" method="POST">
+                      {%else%}
+                      <form action="{%url 'myapp:menu_list' branch%}" method="POST">
+                      {%endif%}
+                         {% csrf_token %}
+                          {% for field in registration_form %}
+                              <div class="form-group">
+                                {% bootstrap_field field %}
+                            
+                                      <!--{% for error  in field.errors %}
+                                      <!-- Output error text message only -->
+
+                                       <!--   {{error}}
+                                      {% endfor %} -->
+                                </div>
+                          {% endfor %}
+                        <button name="registerButton" id="submit_button" class="btn btn-primary btn-block">Submit</button>
+                      </form>
+                </div>
+
+                <!-- button -->
+                <div class="modal-footer">
+                    
+                </div>
+            </div>
+        </div>
+    </div>  
+ <br><br>
+<br>
+<div id="heading">
+	   
+	   <div class="row">
+      {%if food_search%}
 	    <div class=" alert alert-info" style="text-align:center;font-size:1.5em;"> 
 	    	Search Results for <strong> {{search_name}} </strong>
 	    </div>
-	</div>
-	   {%endif%}
+      {%elif have_name%}
+      <div class=" alert alert-info" style="text-align:center;font-size:1.5em;"> 
+        Foods in <strong> {{have_name}},{{have_address}} </strong>
+        {%if price1%}
+          (Price between <strong>{{price1}}</strong> and <strong>{{price2}}</strong>)
+        {%endif%}
+        {%if category_name%}
+          (Category <strong> {{category_name}} </strong>)
+        {%endif%}
+      </div>
+
+      {%endif%}
+	   </div>  
+</div>
+<div id="login_error" style="display:none;">
+
+    <div class="alert alert-danger" style="text-align:center;font-size:1em;"> 
+        <button type="button" class="close alert-close">&times;</button>
+            Please login First!
+    </div>
 </div>
 <div class='container'>
-	<div class='well'>
 	<div class='row'>
-		
-{%for food in foods%}
+    {%if categories%}
 
-	<div class="col-md-4" id="menu{{forloop.counter}}">
-		<div class='well'>
-			<p align='center' > <strong> {{food.0}} </strong>  </p>
-			Price:<font color="blue"> {{food.2}}</font> <br>
-			Rating:<font color="blue"> {{food.4}}</font><br>
-			Category:<font color="blue"> {{food.1}}</font><br>
+    <div class='col-md-2'>
+      <div class='well'>
+      {%for jj in categories%}
+        <div class='well'>
+        {% if branch %}
+        <a href="{% url 'myapp:branch_food_category' branch jj.0%}"> {{jj.0}}</a>
+        {%else%}
+        <a href="{% url 'myapp:food_category_with_name' search_name jj.0%}"> {{jj.0}}</a>
+        {%endif%}
+        </div>
+      {% endfor%}
+      </div>
+    </div>  
+    {%endif%}
+    {%if categories%}
+    <div class='col-md-7'>
+    {%else%}
+    <div class='col-md-9'>
+    {%endif%}
+        <div class='well'>
+        {%for food in foods%}
 
-			{%if food_search%}
-			Restaurant:<font color='blue'>{{food.6}},{{food.7}}</font><br>
-			{%endif%}
+            {%ifequal forloop.counter 1%}
 
-			<meta name="menu_id{{forloop.counter}}" content="{{food.3}}" />
-			Give rating:
-			<select align='left' class="dropdown" id="dropdown{{forloop.counter}}">
-				<option value='1'>1</option>
-				<option value='2'>2</option>
-				<option value='3'>3</option>
-				<option value='4'>4</option>
-				<option value='5' selected>5</option>
-				<option value='6'>6</option>
-				<option value='7'>7</option>
-				<option value='8'>8</option>
-				<option value='9'>9</option>
-				<option value='10'>10</option>
-			</select> 
-			<button class="btn btn-success btn-xs" type="submit" id="{{forloop.counter}}">submit</button> </p>
-			<br>
-		<div class='text-center'>
-		 <button type="submit" class="btn btn-success" id="order{{forloop.counter}}" value="{{forloop.counter}}">Add to Cart</button> 
-		</div>
-		</div>
-	</div>
+            <div class='row'>
+            {%endifequal%}
+            {%ifequal forloop.counter 4 %}
 
-{%endfor%}
+            <div class='row'>
+            {%endifequal%}
+            {%ifequal forloop.counter 7%}
 
+            <div class='row'>
+            {%endifequal%}
+          <div class="col-md-4" id="menu{{forloop.counter}}">
+          		<div class='well'>
+          			<p align='center' > <strong> {{food.0}} </strong>  </p>
+          			Price:<font color="blue"> {{food.2}}</font> <br>
+          			<div id="rating{{forloop.counter}}"> Rating:<strong> {{food.4}}</strong></div>
+          			Category:<font color="blue"> {{food.1}}</font><br>
+
+          			{%if food_search%}
+          			Restaurant:<font color='blue'>{{food.6}},{{food.7}}</font><br>
+          			{%endif%}
+                
+          			<meta name="menu_id{{forloop.counter}}" content="{{food.3}}" />
+                <meta name="amount{{forloop.counter}}" content="{{food.5}}" />
+          			Give rating:
+          			<select align='left' class="dropdown" id="dropdown{{forloop.counter}}">
+          				<option value='1'>1</option>
+          				<option value='2'>2</option>
+          				<option value='3'>3</option>
+          				<option value='4'>4</option>
+          				<option value='5' selected>5</option>
+          				<option value='6'>6</option>
+          				<option value='7'>7</option>
+          				<option value='8'>8</option>
+          				<option value='9'>9</option>
+          				<option value='10'>10</option>
+          			</select> 
+          			<button class="btn btn-success btn-xs" type="submit" id="{{forloop.counter}}">submit</button> </p>
+          
+            <div id="show_amount{{forloop.counter}}"> 
+              {%if food.5 < 1%}
+
+                <strong><font color="red"> Not available </font></strong>
+               {%else%}
+                <strong> Enter amount(Between 1 and {{food.5}} )</strong>
+               {%endif%}
+            </div><br>
+
+            
+            {%if food.5 < 1%}
+            <input class='form-control' size="10" type="number" id="amount{{forloop.counter}}" disabled>
+            {%else%}
+            <input class='form-control' size="10" type="number" id="amount{{forloop.counter}}" >
+            {%endif%}
+            
+          		<div class='text-center'>
+          		 <button type="submit" class="btn btn-success" id="order{{forloop.counter}}" value="{{forloop.counter}}">Add to Cart</button> 
+          		</div>
+            
+          </div>
+          </div>
+
+        {%ifequal forloop.counter 3 %}
+
+        </div>
+        {%endifequal%}
+        {%ifequal forloop.counter 6 %}
+
+        </div>
+        {%endifequal%}
+        {%ifequal forloop.counter 9%}
+
+        </div>
+        {%endifequal%}
+        {%endfor%}
+        </div>
+        </div>
+    </div>
+    {%if form%}
+    <div class='col-md-3'>
+        <div class='well'>
+          <form action="{% url 'myapp:branch_price_category' branch %}" method="POST">
+            {% csrf_token %}
+            {% for field in form %}
+               {% bootstrap_field field show_label=False %}
+             {% endfor %}
+
+          <button name="priceSearchButton" type="submit" class="btn btn-success">Show Food</button>
+          </form>
+        </div>
+    </div>
+    {%endif%}
+  </div>
 </div>
+{%if pagination_num%}
+<div class="text-center">
+<ul class="pagination">
+
+
+	{% if search_name%}
+        <li><a href="/myapp/search all foods/{{search_name}}/page/1"> << </a></li>
+    {% for i in pagination_list%}
+    {% ifequal i pagination %}
+     <li class="active"><a href="/myapp/search all foods/{{search_name}}/page/{{i}}">
+      {{i}}</a></li>
+    {% else %}
+    <li><a href="/myapp/search all foods/{{search_name}}/page/{{i}}">{{i}}</a></li>
+    {%endifequal%}
+    {%endfor%}
+    <li><a href="/myapp/search all foods/{{search_name}}/page/{{pagination_num}}"> >> </a></li>
+  {%else%}
+
+    <li><a href="/myapp/restaurants/{{branch}}/page/1"> << </a></li>
+    {% for i in pagination_list%}
+    {% ifequal i pagination %}
+     <li class="active"><a href="/myapp/restaurants/{{branch}}/page/{{i}}">
+      {{i}}</a></li>
+    {% else %}
+    <li><a href="/myapp/restaurants/{{branch}}/page/{{i}}">{{i}}</a></li>
+    {%endifequal%}
+    {%endfor%}
+    <li><a href="/myapp/restaurants/{{branch}}/page/{{pagination_num}}"> >> </a></li>
+  {%endif %}
+</ul>
 </div>
+{%endif%}
 </div>
 <script>
 	$(document).ready(function()
 	{
-		$('.button').click(function(event){
-			if (this.id[0]=='o')
-			{
-				//alert("order!");
-				var id=this.id;
-				 $.ajax({
-	            type:"GET",
-	            url:"{%url 'myapp:login_varify' %}",
+		        {% if registration_form.errors %}  
+        $("#popUpWindow2").modal("show");
+         {%endif %}
+        $(document).on('click', '.alert-close', function() {
+            document.getElementById("login_error").style.display='none';
+           });
 
-	            success : function(json) {
-	            	console.log(json.login);
-	            	if (json.login=='success')
-	            	{
-	            		var counter=document.getElementById(id).value
-	            		console.log(counter);
-	            		var menu_id="meta[name='menu_id"+counter+"']";
-	            		var food_id=$(menu_id).attr('content');
-	            		console.log(food_id);
-	            		window.location.href = food_id;
-	            	}
-	            	else
-	            	{
-	            		alert('Please Login First');
-	            	}
+          $("#login_submit_button").click(function(event){
+ 
+            $.ajax({
+              type:"POST",
+              url:"{%url 'auth' %}",
 
-	            },
-	        	});
-			}
-			else
-			{
-				var dropdown_id='#dropdown'+this.id;
-				var menu_id="meta[name='menu_id"+this.id+"']";
-				var e = $(dropdown_id).val();
-	            $.ajax({
-	            type:"GET",
-	            url:"{%url 'myapp:login_varify' %}",
+              data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                username:document.getElementById('username').value,
+                password:document.getElementById('password').value,
+              },
+              success : function(json) {
+                if (json.login=='success')
+                {
+                    window.location.href = '';
+                }
+                else{
+                  document.getElementById('show_error').style.display='inline';
+                }
+              },
+            });
+          });
 
-	            success : function(json) {
-	            	if (json.login=='success')
-	            	{
-						//console.log(e);
-						$.ajax({
-			            type: "POST",
-			            url: "{% url 'myapp:submit_rating' %}",
-			            data: {
-			            	csrfmiddlewaretoken: '{{ csrf_token }}',
-			            	value:e,
-			            	menu_id:$(menu_id).attr('content')
-		            	},
-		            	success : function(json) {
-	            			alert("Rating Submitted Successfully!")
-	            		},
-	            		error: function(data) {
-	            			alert("Error submitting rating!")
-	            		}
-	            		});
 
-					}
-	            	else 
-	            	{
-	            		alert('Please Login First');
-	            	}
-	            	console.log(json.login);
-	            	
-	            	//$("#entire_page").dialog();
-	            	//console.log("success");
-	        	},
-		  		error: function(data) {
-	                //alert("Please Login First")
-	            }
-	            });
-			}
-		});
+        $('.btn-success').click(function(event){
+            if (this.name=='priceSearchButton')
+            {
+
+            }
+            else if (this.id[0]=='o')
+            {
+                //alert("order!");
+                var id=this.id;
+                 $.ajax({
+                type:"GET",
+                url:"{%url 'myapp:login_varify' %}",
+
+                success : function(json) {
+                    
+                    var counter=document.getElementById(id).value;
+                    var amount=document.getElementById("amount"+counter).value;
+                    if (json.login=='success')
+                    {
+
+                        var meta_id="meta[name='amount"+counter+"']";
+                        var amount1=$(meta_id).attr('content');
+                  
+                        if ( amount1-amount<0 || amount<1)
+                        {
+                            alert("Enter valid amount");
+
+                        }
+                        else
+                        {
+                            //console.log(counter);
+                            var menu="meta[name='menu_id"+counter+"']";
+                            var food_id=$(menu_id).attr('content');
+
+                            
+                            console.log($(menu).attr('content'));
+                            $.ajax({
+                            type: "POST",
+                            url: "{% url 'myapp:add_order' %}",
+
+                            data: {
+                                csrfmiddlewaretoken: '{{ csrf_token }}',
+                                amount:amount,
+                                menu_id:$(menu).attr('content'),
+                            },
+                            success : function(json) { 
+                                    var amount=json.amount;
+                                    console.log(amount)
+                                    var order_div="#show_amount"+id[5];
+
+                                    alert("Successfully added to your order.You can submit your order or add more foods to your order.");  
+                                      $(meta_id).attr('content',""+amount);
+                                    if (amount>0)
+                                    {
+                                        $(order_div).html("<strong> Enter amount(Between 1 and "+amount+"</strong>)"); 
+                                    }
+                                    else 
+                                    {
+                                        $(order_div).html("<strong><font color='red'> Not available </font></strong>"); 
+                                    }
+                                    
+                                
+                            },
+                            error: function(data) {
+                                alert("Error in ordering food!Please reload the page and try again")
+                            }
+                            });
+                        }
+                    }
+                    else
+                    {
+                        $('#login_error').css("display","inline");
+                    }
+
+                },
+                });
+            }
+            else
+            {
+                var id=this.id;
+                var dropdown_id='#dropdown'+this.id;
+                var menu_id="meta[name='menu_id"+this.id+"']";
+                var e = $(dropdown_id).val();
+                $.ajax({
+                type:"GET",
+                url:"{%url 'myapp:login_varify' %}",
+
+                success : function(json) {
+                    if (json.login=='success')
+                    {
+                        //console.log(e);
+                        $.ajax({
+                        type: "POST",
+                        url: "{% url 'myapp:submit_rating' %}",
+                        data: {
+                            csrfmiddlewaretoken: '{{ csrf_token }}',
+                            value:e,
+                            menu_id:$(menu_id).attr('content')
+                        },
+                        success : function(json) {
+                            alert("Rating Submitted Successfully!");
+                            var rating=json.rating;
+                            console.log(rating);
+                            var rating_div="#rating"+id;
+                            console.log(rating_div);
+                            $(rating_div).html("Rating:<strong>"+rating+"</strong>");
+
+                        },
+                        error: function(data) {
+                            alert("Error submitting rating!");
+                        }
+                        });
+
+                    }
+                    else 
+                    {
+                        document.getElementById("login_error").style.display='inline';
+                    }
+                },
+                error: function(data) {
+                    //alert("Please Login First")
+                }
+                });
+            }
+        });
 		
 	});
 </script>

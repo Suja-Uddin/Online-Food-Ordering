@@ -3,6 +3,20 @@
 <head>
 	<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
 	<link rel="stylesheet" href="{% static "style.css" %}">
+	  {% load staticfiles %} {% load bootstrap3 %}
+ 
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{% static "bootstrap.min.css" %}">
+  <script src="{% static "jquery.min.js" %}"></script>
+  <script src="{% static "bootstrap.min.js" %}"></script>
+
+  <meta charset="utf-8">
+
+   <link rel="stylesheet" href="{% static "jquery-ui.css" %}">
+  <script src="{% static "jquery-ui.js" %}"></script>
+  <script src="{% static "jquery-1.10.2.js" %}"></script>
+
 </head>
 <body>
 
@@ -27,7 +41,7 @@
 		    <li><a href="/myapp/admin/all_tables"><span>Show Tables</span></a></li>
 		    <li><a href="/myapp/admin/insert_menu" ><span>Insert Menu</span></a></li>
 		    <li><a href="" class="active"><span>Insert Employee</span></a></li>
-
+		    <li><a href="{%url 'myapp:all_orders'%}"><span>See All Orders</span></a></li>
 		</ul>
 	</div>
 	<div class="message thank-message">
@@ -50,16 +64,14 @@
 		<table>
         {% for field in form %}
           <tr>
-            <th align='left'><br>{{field.label_tag}}<br><br></th> 
             <td>
-              {{ field }}
+              {% bootstrap_field field %}
             </td>
-            <td>{{ field.errors }}</td>
           </tr>
         {% endfor %}
       	</table>
 		<br><br>
-		<input type="submit" value="Add Employee">
+		<input type="submit" value="Add Employee" class='btn btn-success'>
 		
 		</form>
 		<br><br><br><br><br><br>

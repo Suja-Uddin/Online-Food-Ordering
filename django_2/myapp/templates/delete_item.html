@@ -3,6 +3,19 @@
 <head>
 	<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
 	<link rel="stylesheet" href="{% static "style.css" %}">
+
+		  {% load staticfiles %} {% load bootstrap3 %}
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{% static "bootstrap.min.css" %}">
+  <script src="{% static "jquery.min.js" %}"></script>
+  <script src="{% static "bootstrap.min.js" %}"></script>
+
+  <meta charset="utf-8">
+
+   <link rel="stylesheet" href="{% static "jquery-ui.css" %}">
+  <script src="{% static "jquery-ui.js" %}"></script>
+  <script src="{% static "jquery-1.10.2.js" %}"></script>
+
 </head>
 <body>
 
@@ -26,7 +39,7 @@
 		    <li><a href=""class="active"><span>Show Tables</span></a></li>
 		    <li><a href="/myapp/admin/insert_menu"><span>Insert Menu</span></a></li>
 		    <li><a href="/myapp/admin/insert_employee"><span>Insert Employee</span></a></li>
-
+		    <li><a href="{%url 'myapp:all_orders'%}"><span>See All Orders</span></a></li>
 
 		</ul>
 	</div>
@@ -47,7 +60,7 @@
 		<br><br>
 		<form action="{%url 'myapp:delete_item' table_name %}" method="POST"> 
         {% csrf_token %}
-		<table style="margin: 0px auto;" border="1">
+		<table style="margin: 0px auto;" class='table table-hover'>
 		<tr>
 		{% for col in column_list %}
             
@@ -64,7 +77,7 @@
           <td>{{i}}</td>
           {% endfor %}
            
-          <td><input type="checkbox" name="checks[]" value="{{field.0}}" />
+          <td><input class='form-control' type="checkbox" name="checks[]" value="{{field.0}}" />
           </tr>
         {% endfor %}
       	</table>
@@ -72,13 +85,27 @@
 		<br><br>
 	</div>
 	<div style="float:center;text-align:center;">
-	<input type="submit" align="center"  value="DELETE" />
+	<input type="submit" align="center"  value="DELETE" class='btn btn-success'/>
 	</form>
 	</div>
       
 	
 </div>
+<div class="text-center">
+<ul class="pagination">
 
+    <li><a href="{%url 'myapp:delete_item_pagination' table_name 1 %}"> << </a></li>
+    {% for i in pagination_list%}
+    {% ifequal i pagination %}
+     <li class="active"><a href="{%url 'myapp:delete_item_pagination' table_name i %}">
+      {{i}}</a></li>
+    {% else %}
+    <li><a href="{%url 'myapp:delete_item_pagination' table_name i %}">{{i}}</a></li>
+    {%endifequal%}
+    {%endfor%}
+    <li><a href="{%url 'myapp:delete_item_pagination' table_name pagination_num %}"> >> </a></li>
+</ul>
+</div>
 <div id="footer">
 	<p>&copy; designed by suja and dipto.</a></p>
 </div>
