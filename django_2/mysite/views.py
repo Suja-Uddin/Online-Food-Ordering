@@ -15,13 +15,19 @@ def auth_view(request):
 	if request.method=="POST":
 		username=request.POST.get('username','')
 		password=request.POST.get('password','')
-		print("hello")
-		print(username)
-		print(password)
+		
 		user=auth.authenticate(username=username,password=password)
 		data={}
 		if user is not None:
 			auth.login(request,user)
+			c=connection.cursor()
+			c.execute("select admin_id from myadmin where username=%s",(username,))
+			t=c.fetchone()
+			data['admin']='false'
+		
+			if t is not None:
+				data['admin']='true'
+
 			data['login']='success'
 			return JsonResponse(data)
 		else:

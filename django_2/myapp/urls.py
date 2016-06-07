@@ -6,11 +6,13 @@ urlpatterns = patterns('',
 	#url(r'^(?P<emp_id>\d+)/(?P<dept_name>\w+)/(?P<dept_id>\d+)/$' , newdept), 
 	url(r'^$',views.index,name='index'),
 
-	url(r'^admin/$',views.admin_site,name='admin'),
+	url(r'^admin/$',views.show_tables,name='admin'),
 
 	url(r'^admin/insert_restaurant/$',views.insert_restaurant,name='insert_restaurant'),
 
 	url(r'^admin/insert_area/$',views.insert_area,name='insert_area'),
+
+	url(r'^admin/insert_food/$',views.insert_food,name='insert_food'),
 
 	url(r'^admin/insert_branch/$',views.insert_branch,name='insert_branch'),
 
@@ -27,6 +29,9 @@ urlpatterns = patterns('',
 	url(r'admin/See All Order/$',views.all_orders,name='all_orders'),
 
 	url(r'^admin/update_item/(?P<table_name>([\w]+[ ]*[\w]*))$',views.update_item,name='update_item'),
+
+
+	url(r'^admin/update_item/(?P<table_name>([\w]+[ ]*[\w]*))/page/(?P<pagination>[\d]+)/$',views.update_item,name='update_item_pagination'),
 
 	url(r'^search all foods/$',views.search_food,name='search_food'),
 
@@ -76,6 +81,8 @@ urlpatterns = patterns('',
 	url(r'^restaurants/branches/(?P<restaurant_id>[\d]+)/page/(?P<pagination>[\d]+)/$',views.show_branches,name='branches_pagination'),
 
 	url(r'^order/$',views.take_order,name='order'),
+
+	url(r'^order/(?P<order_id>[\d]+)/$',views.take_order,name='order_cancel'),
 
 	url(r'^order/(?P<order_id>[\d]+)/success/$',views.order_submit,name='order_submit'),
 

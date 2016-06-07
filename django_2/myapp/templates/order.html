@@ -151,7 +151,9 @@
               {%endfor%}
             </table>
           </div>
-        <p align='center'> <button class="btn btn-success" type="submit"> submit order</button> </p>
+        <p align='center'> <button name="submit_button" class="btn btn-success" type="submit"> Submit order</button>
+          <a href="/myapp/order/{{orderid}}" class="btn btn-success"> Cancel order</a>
+         </p>
         </form>
       </div>
       <div class='col-md-1'></div>

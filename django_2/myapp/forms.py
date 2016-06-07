@@ -49,8 +49,6 @@ class priceForm(forms.Form):
 				    },
 				)
 		return self.cleaned_data['price2']
-
-
 class orderForm(forms.Form):
 	qq="select initcap(area_name),area_id from Area order by initcap(area_name)"
 	c=connection.cursor()
@@ -66,8 +64,6 @@ class orderForm(forms.Form):
 
 	area = forms.ChoiceField(label='Enter your area',choices=temp,required=True)
 	address=forms.CharField(label='Enter the delivery address',required=True)
-
-
 class foodForm(forms.Form):
 	qq="select food_id from food order by  food_id"
 	c=connection.cursor()
@@ -80,7 +76,6 @@ class foodForm(forms.Form):
 	food_id=forms.ChoiceField(label="Food ID",choices=food_list)
 	food = forms.CharField(label='Food Name')
 	category = forms.CharField(label='Category Name')
-
 class foodForm1(forms.Form):
 	qq="select food_id from food order by  food_id"
 	c=connection.cursor()
@@ -93,7 +88,6 @@ class foodForm1(forms.Form):
 	food_id=forms.ChoiceField(label="Food ID",choices=food_list)
 	food = forms.CharField(label='Food Name',required=False)
 	category = forms.CharField(label='Category Name',required=False)
-
 class restaurantForm(forms.Form):
 	qq="select restaurant_id from restaurant order by  restaurant_id"
 	c=connection.cursor()
@@ -105,7 +99,6 @@ class restaurantForm(forms.Form):
 
 	restaurant_id=forms.ChoiceField(label="Restaurant ID",choices=restaurant_list)
 	restaurant = forms.CharField(label='Restaurant Name')
-
 class areaForm(forms.Form):
 	qq="select area_id from area order by  area_id"
 	c=connection.cursor()
@@ -198,7 +191,6 @@ class employeeForm(forms.Form):
 	hire_date = forms.DateField(label='Hire Date')
 	salary = forms.DecimalField(label='Salary',required=True,min_value=0)
 
-
 class update_employee(forms.Form):
 	area_list=[]
 	c=connection.cursor()
@@ -277,3 +269,29 @@ class update_branch(forms.Form):
 	restaurant_id = forms.ChoiceField(label='Restaurant Name',choices=restaurant_list)
 	address = forms.CharField(label='Branch Address',required=False)
 	dcharge = forms.DecimalField(label='Delivery Charge',required=False,min_value=0)
+
+class order_form(forms.Form):
+	order_id=[]
+	c=connection.cursor()
+	c.execute("select order_id from foodorder order by order_id")
+	t=c.fetchall()
+	for ii in t:
+		order_id.append((ii[0],ii[0]))
+	order=forms.ChoiceField(label='Order ID',choices=order_id)
+	
+	emp_list=[]
+	c.execute("select emp_name,emp_id from employee order by emp_id")
+	t=c.fetchall()
+	for ii in t:
+		emp_list.append((ii[1],ii[0]))
+	emp_id=forms.ChoiceField(label='Employee Name',choices=emp_list)
+
+class customer_form(forms.Form):
+	customer=[]
+	c=connection.cursor()
+	c.execute("select name||'('||username||')',username from customer order by customer_id")
+	t=c.fetchall()
+	for ii in t:
+		customer.append((ii[1],ii[0]))
+	customer=forms.ChoiceField(label='Customer Name',choices=customer)
+

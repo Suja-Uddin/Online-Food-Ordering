@@ -30,21 +30,16 @@
 		<h1><a href="#">Admin Site</a></h1>
 		<div class="right">
 			<p>Welcome <strong><font color='white'>Administrator</font></strong></a></p>
-			<p><a href=""><strong>Log Out</strong></a></p>
+			<p><a href="{%url 'logout'%}"><strong>Log Out</strong></a></p>
 		
 		</div>
 	</div>
 	
 	<div id="navigation">
 		<ul> 
-		    <li><a href="/myapp/admin/insert_area"><span>Insert Area</span></a></li>
-		    <li><a href="/myapp/admin/insert_restaurant"><span>Insert Restaurant</span></a></li>
-		    <li><a href="/myapp/admin/insert_restaurant"><span>Insert Food</span></a></li>
-		    <li><a href="/myapp/admin/insert_branch"><span>Insert Branch</span></a></li>
-		    <li><a href=""class="active"><span>Show Tables</span></a></li>
-		    <li><a href="/myapp/admin/insert_menu"><span>Insert Menu</span></a></li>
-		    <li><a href="/myapp/admin/insert_employee"><span>Insert Employee</span></a></li>
-		    <li><a href="{%url 'myapp:all_orders'%}"><span>See All Orders</span></a></li>
+			<li><a href="/myapp/admin"><span>Home</span></a></li>
+		  <li><a href="{%url 'myapp:all_orders'%}"><span>See All Orders</span></a></li>
+      <li><a href="{%url 'myapp:index'%}"><span>View website</span></a></li>
 
 		</ul>
 	</div>
@@ -89,9 +84,27 @@
           <tr>
           <td>{{table}}</td>
           <td >
-          	
-			    <a href="/myapp/admin/update_item/{{table}}">Update</span></a>
+          		{%if table|stringformat:"s" == "Area" %}
+          		<a href="/myapp/admin/insert_area">Insert</a>
+          		{%elif table|stringformat:"s" == "Restaurant" %}
+          		<a href="/myapp/admin/insert_restaurant">Insert</a>
+          		{%elif table|stringformat:"s" == "Food"%}
+          		<a href="/myapp/admin/insert_food">Insert</a>
+          		{%elif table|stringformat:"s" == "Branch"%}
+          		<a href="/myapp/admin/insert_branch">Insert</a>
+          		{%elif table|stringformat:"s" == "Menu"%}
+          		<a href="/myapp/admin/insert_menu">Insert</a>
+          		{%elif table|stringformat:"s" == "Employee"%}
+          		<a href="/myapp/admin/insert_employee">Insert</a>
+          		{%endif%}
+
+              <a href="/myapp/admin/update_item/{{table}}">Update</a>
+         
+			    {% if table|stringformat:"s" == "Order"  %}
+          {% elif table|stringformat:"s" == "Customer"  %}
+			    {%else%}
 			    <a href="/myapp/admin/delete_item/{{table}}"><span>Delete</span></a>
+			    {%endif%}
 		
           </td>
 	          

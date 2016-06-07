@@ -1,4 +1,4 @@
-<html>
+
 <html lang="en">
 <head>   {% load staticfiles %} {% load bootstrap3 %}
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -183,7 +183,7 @@
         {%for food in foods%}
 
             {%ifequal forloop.counter 1%}
-
+              
             <div class='row'>
             {%endifequal%}
             {%ifequal forloop.counter 4 %}
@@ -253,7 +253,7 @@
 
         </div>
         {%endifequal%}
-        {%ifequal forloop.counter 9%}
+        {%ifequal forloop.counter 10%}
 
         </div>
         {%endifequal%}

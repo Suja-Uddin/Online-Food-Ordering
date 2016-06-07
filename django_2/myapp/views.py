@@ -9,7 +9,7 @@ from collections import namedtuple
 from django.shortcuts import render_to_response 
 from django.template import RequestContext
 from django.contrib import auth
-from myapp.forms import priceForm,orderForm,MyRegistrationForm,foodForm,restaurantForm,areaForm,branchForm,menuForm,employeeForm,update_branch,update_menu,update_employee,foodForm1,areaForm1
+from myapp.forms import priceForm,orderForm,MyRegistrationForm,foodForm,restaurantForm,areaForm,branchForm,menuForm,employeeForm,update_branch,update_menu,update_employee,foodForm1,areaForm1,order_form,customer_form
 from django.http import Http404
 from django.core.context_processors import csrf
 from math import *
@@ -38,9 +38,17 @@ def index(request,form_error=0):
 	c.execute(qq)
 	categories=c.fetchall()
 
+	is_admin=''
+	username=request.user.username
+	if username is not None:
+		c.execute("select admin_id from myadmin where username=%s",(username,))
+		t=c.fetchone()
+		
+		if t is not None:
+			is_admin='true'
+
 	cont=RequestContext(request, {'registration_form':registration_form,
-		'form':form,'categories':categories})
-	
+		'form':form,'categories':categories,'is_admin':is_admin})
 	return HttpResponse(tmpl.render(cont))
 def show_food_category(request,category_name,pagination=1):
 	registration_form=MyRegistrationForm()
@@ -736,11 +744,14 @@ def order_submit(request,order_id,area_id='NULL',address='NULL'):
 
 	c.callproc("update_bill",(request.user.username,total))
 	return render(request,"order_success.html",RequestContext(request,{'foods':order_list,'total':total}))
-def take_order(request):
+
+def take_order(request,order_id=0):
 	c=connection.cursor()
 	temp=[]
 	name=request.user.username
-	print(name)
+	#print(name)
+	if order_id!=0:
+		c.execute("delete from foodorder where order_id=%s",(order_id,))
 	order_list=[]
 	c.execute("select customer_id from customer where username=%s",(name,))
 	
@@ -798,13 +809,14 @@ def take_order(request):
 		order_list[i].append(temp3[1])#orderinfo_id
 		i+=1
 	
-	print(order_list)
+	#print(order_list)
 	if request.method=='POST':
+
 		form=orderForm(request.POST)
 		if form.is_valid():
 			area_id=form.cleaned_data['area']
 			address=form.cleaned_data['address']
-			print(area_id)
+			#print(area_id)
 			return order_submit(request,orderid,area_id,address)
 			#return render(request,"order_success.html",RequestContext(request,{'order_list':order_list}))
 		else:
@@ -848,7 +860,7 @@ def show_orders(request,pagination=1):
 
 	if not orderlist:
 		no_order="no order"
-		return render(request,"order.html",RequestContext(request,{'no_order':no_order}))
+		#return render(request,"order.html",RequestContext(request,{'no_order':no_order}))
 	
 	order_list=[]  #final order list to be rendered
 	i=0
@@ -905,8 +917,7 @@ def show_orders(request,pagination=1):
 	
 	return render(request,"show_orders.html",RequestContext(request,{'order_list':order_list,
 		'pagination_num':pagination_num,'pagination':pagination,'pagination_list':pagination_list,}))
-
-def admin_site(request):
+def insert_food(request):
 	food_name=""
 	category_name=""
 	form=foodForm()
@@ -1077,7 +1088,8 @@ def show_tables(request):
 	tables.append("Branch")
 	tables.append("Menu")
 	tables.append("Employee")
-	
+	tables.append("Order")
+	tables.append("Customer")
 
 	return render(request,"all_tables.html",RequestContext(request,{'tables':tables}))
 def delete_item(request,table_name,pagination=1):
@@ -1279,8 +1291,7 @@ def all_orders(request,pagination=1):
 	print(order_list)
 	return render(request,"admin_show_orders.html",RequestContext(request,{'pagination_num':pagination_num,
 					'pagination':pagination,'pagination_list':pagination_list,'order_list':order_list,}))
-
-def update_item(request,table_name):
+def update_item(request,table_name,pagination=1):
 	c=connection.cursor()	
 	updated=""
 	error=""
@@ -1413,7 +1424,34 @@ def update_item(request,table_name):
 					c.execute("select dcharge from branch where branch_id=%s",(branch_id,))
 					dcharge=c.fetchone()[0]
 				c.execute("update branch set area_id=%s,restaurant_id=%s,address=%s,dcharge=%s where branch_id=%s",(area_id,restaurant_id,address,dcharge,branch_id))
+		elif table_name=="ORDER":
+			form=order_form(request.POST)
+			if form.is_valid():
+				updated="updated"
 
+				order_id=form.cleaned_data['order']
+				emp_id=form.cleaned_data['emp_id']
+
+				c.execute("update foodorder set emp_id=%s",(emp_id,))
+		elif table_name=="CUSTOMER":
+			form=customer_form(request.POST)
+			if form.is_valid():
+				updated="updated"
+				customer=form.cleaned_data['customer']
+				c.execute("select is_admin from myadmin where username=%s",(customer,))
+				t=c.fetchone()
+				if t is None:
+					c.execute("select max(admin_id) from myadmin")
+					t=c.fetchone()[0]
+					t=int(t)
+					c.execute("insert into myadmin values(%s,%s,1)",(t+1,customer,))
+				else:
+					t=int(t[0])
+					if t==1:
+						t=0
+					else:
+						t=1
+					c.execute("update myadmin set is_admin=%s where username=%s",(t,customer,))
 	columns=[]
 	if table_name.upper()=="AREA":
 		columns.append("Area id")
@@ -1437,6 +1475,18 @@ def update_item(request,table_name):
 		columns.append("Phone")
 		columns.append("Hire Date")
 		columns.append("Salary")
+	elif table_name.upper()=="ORDER":
+		columns.append("Order ID")
+		columns.append("Customer Name")
+		columns.append("Order Date")
+		columns.append("Employee Name")
+		columns.append("Address")
+	elif table_name.upper()=="CUSTOMER":
+		columns.append("Customer ID")
+		columns.append("Customer Name")
+		columns.append("Username")
+		columns.append("Address")
+		columns.append("Is Admin?")
 	else:
 		c.execute("select COLUMN_NAME from ALL_TAB_COLUMNS where TABLE_NAME=%s",(table_name.upper(),))
 		columns=c.fetchall()
@@ -1448,7 +1498,7 @@ def update_item(request,table_name):
 		column_num.append(pp)
 
 	column_list=[]
-	if table_name.upper() == "AREA" or  table_name.upper() == "BRANCH" or table_name.upper() == "MENU" or table_name.upper() == "EMPLOYEE" :
+	if table_name.upper() == "AREA" or  table_name.upper() == "BRANCH" or table_name.upper() == "MENU" or table_name.upper() == "EMPLOYEE" or table_name.upper()=="ORDER" or table_name.upper()=="CUSTOMER":
 		column_list=columns
 	else:
 		for col in columns:
@@ -1474,12 +1524,33 @@ def update_item(request,table_name):
 	elif table_name.upper()=="EMPLOYEE":
 		c.execute("select emp_id,(select area_name from area where area_id=e.area_id),emp_name,phone,hire_date,\
 		salary from EMPLOYEE e order by emp_id")	
-
+	elif table_name.upper()=="ORDER":
+		c.execute("select order_id,(select name from customer where customer_id=f.customer_id),order_date,(select emp_name from employee where emp_id=f.emp_id),address from foodorder f order by order_id")
+	elif table_name.upper()=="CUSTOMER":
+		c.execute("select customer_id,name,username,address,(select is_admin from myadmin where username=c.username) from customer c order by customer_id")
 	t=c.fetchall()
+	pagination=int (pagination)
+	pagination_num=len(t)/9
+	start=9*(pagination-1)
+	end=start+9
+	t=t[start:end]
+	pagination_num=int(ceil(pagination_num))
+	pagination_list=[]
+	if pagination>2:
+		pagination_list.append(pagination-2)
+	if pagination>1:
+		pagination_list.append(pagination-1)
+	pagination_list.append(pagination)
+	if pagination+1<=pagination_num:
+		pagination_list.append(pagination+1)
+	if pagination+2<=pagination_num:
+		pagination_list.append(pagination+2)
+
 	for ii in t:
 			items.append([])
 	i=0
 	print(t)
+	print(column_list)
 	for jj in t:
 		for kk in range (0,n):
 			items[i].append(jj[kk])
@@ -1499,8 +1570,14 @@ def update_item(request,table_name):
 		form=update_menu()
 	elif table_name=="EMPLOYEE":
 		form=update_employee()
+	elif table_name=="ORDER":
+		form=order_form()
+	elif table_name=="CUSTOMER":
+		form=customer_form()
 	#print(form)
-	return render(request,"update_item.html",RequestContext(request,{'error':error,'success':updated,'table_name':table_name,'column_list':column_list,'items':items,'form':form}))
+	return render(request,"update_item.html",RequestContext(request,{'error':error,'success':updated,\
+		'table_name':table_name,'column_list':column_list,'items':items,'form':form,'pagination_num':pagination_num,
+					'pagination':pagination,'pagination_list':pagination_list,}))
 
 
 

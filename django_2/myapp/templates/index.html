@@ -55,6 +55,9 @@
         <li><a href="{%url 'myapp:order' %}">Submit Your order</a></li>
         
         <li><a href="{%url 'myapp:show_orders'%}">Previous Orders</a></li>
+        {%if is_admin%}
+        <li><a href="{%url 'myapp:admin'%}">Go to Admin Page</a></li>
+        {%endif%}
         {%endif%}
       </ul>
 
@@ -266,7 +269,15 @@
       success : function(json) {
         if (json.login=='success')
         {
-            window.location.href = '';
+            if (json.admin=='true')
+            {
+              console.log("admin");
+              window.location.href='/myapp/admin';
+            }
+            else
+            {
+              window.location.href = '';
+            }
         }
         else{
           document.getElementById('show_error').style.display='inline';
